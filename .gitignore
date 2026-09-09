@@ -102,6 +102,7 @@ RESTARTS_*
 *.pdf
 *.svg
 *.png
+*.gif
 
 # =============================================================================
 # Generated working / logging / output dirs (scratch — not for git)
