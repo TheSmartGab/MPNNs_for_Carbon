@@ -148,3 +148,4 @@ These rules are load-bearing for this repo and should be preserved:
   seaborn, argcomplete. Optional `gpu` extra adds `torch` for MACE/NequIP on GPU.
 - Some analysis scripts expect the `.venv` at the repo root and expect the gitignored data
   directories (`DATASETS/`, `gpaw_testing/`) to be present locally.
+- In order to run independent MD simulations, the [get_prime.php](primes/get_prime.php) must be symlinked in /usr/bin so that it can be called from anywhere seamlessly.
