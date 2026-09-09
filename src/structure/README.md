@@ -30,6 +30,3 @@ This directory contains utilities for structural analysis of molecular dynamics 
 
 - **`structural_analysis.py`**: General structural analysis utilities for identifying motifs, coordination numbers, and local symmetry in atomic configurations.
 
-## Usage
-
-The `structure/` directory contains the core tools for analyzing molecular dynamics simulation outputs, particularly for studying bond breaking dynamics, reaction rates, and structural transitions. The `InferRate.py` and related scripts are used to extract kinetic information from MD trajectories, while the `extract_*` and `save_configs_from_trajs.py` utilities process trajectory files into discrete configurations suitable for ML potential evaluation or training.

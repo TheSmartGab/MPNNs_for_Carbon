@@ -1,3 +1,5 @@
+# TEMPLATE config file for nequip hyperparameters gridsearch
+
 # The config file is divided into 4 sections -- `data`, `train`, `model`, and `global_options`
 # The config system relies on omegaconf (https://omegaconf.readthedocs.io/en/2.3_branch/index.html)
 # and hydra (https://hydra.cc/docs/intro/) functionalities, such as

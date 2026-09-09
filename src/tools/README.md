@@ -4,9 +4,9 @@ This directory contains general utility scripts for common tasks across the proj
 
 ## Key Scripts:
 
-- **`generate_configs.py`**: Generate atomic configurations or simulation setups programmatically. Useful for creating test structures, initial configurations for MD simulations, or grid scans of structural parameters.
+- **`generate_configs.py`**: Generate .yaml configuration files for hyperparameters gridsearch.
 
-- **`plot_metric_vs_hparams.py`**: Plot how model metrics (RMSE, MAE, etc.) vary with hyperparameters or model configuration choices. This script is useful for comparing different model architectures, training sizes, or preprocessing strategies.
+- **`plot_metric_vs_hparams.py`**: Plot how model metrics (RMSE, MAE, etc.) vary with hyperparameters or model configuration choices.
 
 ## Usage
 
