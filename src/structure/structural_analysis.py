@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 import multiprocessing as mp
 
+# library used by other scripts in this directory
 
 ############################################################
 # manage neighbors and boundary atoms

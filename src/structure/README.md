@@ -4,11 +4,13 @@ This directory contains utilities for structural analysis of molecular dynamics 
 
 ## Key Scripts:
 
+- **`structural_analysis.py`**: General structural analysis library for identifying motifs, coordination numbers, and local symmetry in atomic configurations. USed by other scripts.
+
+- **`broken.py`**: Utilities for determining whether a graphene sheet is broken or not. It has been used in production runs to determine what runs to stop and which to carry on simulating.
+
 - **`ArreniusPlot.py`**: Generate Arrhenius plots (ln(rate) vs 1/kT) from reaction rate data to extract activation energies.
 
-- **`broken.py`**: Utilities for detecting broken bonds or structural defects in atomic configurations.
-
-- **`compare_files.py`**, **`compare_rates.py`**: Compare files or computed rates across different simulations or models.
+- **`compare_rates.py`**: Compare files or computed rates across different simulations or models.
 
 - **`dump2traj.py`**: Convert dump files (LAMMPS format) to trajectory formats (e.g., .traj using ASE).
 
@@ -25,8 +27,3 @@ This directory contains utilities for structural analysis of molecular dynamics 
 - **`plot_cell_vs_distance.py`**, **`plot_dimer_potential.py`**, **`plot_ef_vs_distance.py`**, **`plot_thermo.py`**: Visualization utilities for cell parameters, dimer potentials, energy vs distance curves, and thermodynamic properties.
 
 - **`rate_vs_beta.py`**: Analyze how reaction rates vary with inverse temperature (beta = 1/kT).
-
-- **`save_configs_from_trajs.py`**: Save atomic configurations extracted from MD trajectories to extxyz or other formats.
-
-- **`structural_analysis.py`**: General structural analysis utilities for identifying motifs, coordination numbers, and local symmetry in atomic configurations.
-

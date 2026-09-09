@@ -29,6 +29,7 @@ RESTARTS_*
 *.pth
 *.ckpt
 *.extxyz
+*.swp
 # =============================================================================
 # KEPT: final model weights — intentionally tracked, overriding the *.model /
 #       *.pt / *.pth / *.ckpt ignores above. Only exported finals: no per-epoch
