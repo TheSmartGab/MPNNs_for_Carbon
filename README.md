@@ -14,6 +14,17 @@ structural, vibrational (phonon), and mechanical properties of graphene.
 
 ---
 
+## The important stuff
+
+The main results obtained in this thesis are 
+-  The calculation of the stability boundary at 0 temperature. The main script is
+-  The (bayesian) inference of the graphene breaking rate at finite temperature. To this end, the LAMMPS and bash scripts used to automate the LAMMPS run are stored in src/mace/MD/LAMMPS_SCRIPTS/graphene/strain_stress. The tools for the structural analysis and Bayesian inference are stored in src/structure, and they are model-independent. 
+
+Many of the Python scripts and notebooks reported here are helpers, plotters, and tests. They are not intended to be general in their purpose, but they may help understand the obtained results and the
+problems encountered along the way in a bottom-up approach, thus, they are retained in this repository for illustrative purposes.
+
+---
+
 ## Repository layout
 
 | Directory | What it is |
