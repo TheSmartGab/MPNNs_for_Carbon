@@ -1,0 +1,78 @@
+
+# Thermalize a system at give temperature
+# variables to controll the system
+variable TEMP index 300
+variable MODEL index "MACE.model"
+variable DUMPFILE index "thermalize.dump"
+variable OUT_CONFIG index "thermalized.lammps-data"
+variable INPUT_CONFIG index "input.lammpsdata"
+
+# some additional options
+variable SEED index 1009 # can make independent thermalizations
+# time variables
+# the defaults are consistent with each other, meaning tdamp is 1000 times the timestep, and 10000 timesteps are performed. Change these variables sensibely
+variable timestep index 0.001 #defaults to fs, change if reasonable to do so
+variable tdamp index 1.0 # damping time for thermalization
+variable nsteps index 10000 # steps to thermalize
+
+# control how often to log information
+variable nthermo index 1
+variable ndump index 1000
+
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+print "==========================================="
+print "READING DATA"
+read_data ${INPUT_CONFIG}
+print "==========================================="
+
+mass            1 12.011
+
+print "==========================================="
+print "READING MODEL"
+
+pair_style      mliap unified ${MODEL} 0
+pair_coeff      * * C
+
+print "==========================================="
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        ${timestep}
+
+# computes
+compute temp_compute  all temp
+compute press_compute all pressure temp_compute
+
+# thermo style. print each step, then do data blocking in postprocessing
+thermo          ${nthermo}
+thermo_style    custom step temp pe ke etotal press &
+    c_press_compute[1] c_press_compute[2] c_press_compute[3] &
+    c_press_compute[4] c_press_compute[5] c_press_compute[6] &
+
+# write trajectory every 
+dump        dump_thermo all custom ${ndump} ${DUMPFILE} id type x y z vx vy vz fx fy fz
+
+print "==========================================="
+print "Initializeing velocities"
+velocity all create ${TEMP} ${SEED} mom yes rot yes dist gaussian
+run 0
+
+fix dyn         all nve/kk
+
+fix thermostat	all langevin/kk &
+			${TEMP} ${TEMP} ${tdamp} ${SEED} zero yes
+
+print "==========================================="
+print "THERMALIZATION START"
+run ${nsteps}
+
+print "THERMALIZATION ENDS"
+print "SAVING LAST CONFIGURATION"
+write_data ${OUT_CONFIG} 

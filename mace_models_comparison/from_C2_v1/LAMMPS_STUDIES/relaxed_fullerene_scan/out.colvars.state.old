@@ -1,0 +1,20 @@
+configuration {
+  step            0
+  dt 1.000000e-06
+  version 2025-08-27
+}
+
+colvar {
+  name com_dist
+  x                    25
+}
+
+restraint {
+  configuration {
+    step 0
+    name harmonic1
+firstStep            0
+centers   2.50000000000000e+01
+  }
+}
+

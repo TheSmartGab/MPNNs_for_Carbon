@@ -1,0 +1,16 @@
+model_details:
+  total_parameters: 355088
+loss_function:
+  type: WeightedEnergyForcesStressLoss
+  weights:
+    energy_weight: 1.0
+    forces_weight: 10.0
+    stress_weight: 10.0
+optimizer_information:
+  optimizer: ADAM
+  batch_size: 16
+  ema_decay: 0.99
+  gradient_updates: 545536
+  learning_rate: 0.001
+  weight_decay: 5.0e-07
+  gradient_clipping_tolerance: 10.0

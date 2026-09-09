@@ -1,0 +1,1 @@
+https://aflowlib.org/API/aflux/?species(C),$nspecies(1),$paging(1,1000)

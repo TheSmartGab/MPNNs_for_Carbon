@@ -1,0 +1,11 @@
+FAST INDACO
+lammps compiled with -O3 --fast math and others to push numerical efficiency
+
+SLOW INDACO
+lammps compiled with only --build_type release. Note that these went in timeout due to a mistake in OMP_NUM_THREADS which slowed them down.
+
+LOCAL OUTPUT
+computations done locally on my pc
+
+ORIGINAL OUTPUT
+the original runs that all broke

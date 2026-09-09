@@ -1,0 +1,62 @@
+# ============================================================
+# Fullerene–fullerene interaction scan
+# ============================================================
+
+clear
+units           metal
+dimension       3
+boundary        s s s
+atom_style      atomic
+atom_modify     map yes
+newton          on
+
+read_data       relaxed_fullerene.lammps-data
+read_data       relaxed_fullerene.lammps-data add append offset 0 0 0 0 0
+
+mass            1 12.011
+labelmap        atom 1 C
+
+pair_style      mace no_domain_decomposition
+pair_coeff      * * "../../MACE.model-lammps.pt" C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# Define molecules
+compute myCount all count/type atom
+run 0
+variable natoms equal c_myCount[1]
+variable mol1_max_id equal ${natoms}/2
+group           mol1 id <= ${mol1_max_id}
+group           mol2 subtract all mol1
+
+variable        zmin equal 8.0
+variable        zmax equal 25.0
+variable        dz   equal 0.1
+variable        nsteps equal floor((${zmax}-${zmin})/${dz})+1
+
+variable        outfile string fullerene_potential.out
+print           "# distance(A)   PE(eV)" file ${outfile}
+
+thermo          1
+thermo_style    custom step pe
+
+variable i loop ${nsteps}
+label loop_start
+
+    variable zsep equal ${zmin} + (${i}-1)*${dz}
+
+    displace_atoms mol2 move 0.0 0.0 ${zsep} units box
+
+    reset_timestep 0
+    run 0
+
+    variable pe equal pe
+    print "${zsep} ${pe}" append ${outfile}
+
+    displace_atoms mol2 move 0.0 0.0 -${zsep} units box
+
+next i
+jump SELF loop_start
+
+print "Distance scan complete"

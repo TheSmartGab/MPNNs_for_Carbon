@@ -1,0 +1,57 @@
+===================================================================
+    GAMMA POINT PHONON BRANCHES SUMMARY (NON-REPEATED OPTICAL)
+===================================================================
+Reference Source (Last Element): DFT-PBEsol
+
+--- 1. ACOUSTIC BRANCH SOUND VELOCITIES (PER PATH SEGMENT) ---
+Direction Segment: $\Gamma \rightarrow$ M
+---------------------------------------------------------------------------
+Branch  l0 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       18.455           6.071          +203.99%       
+2       76.447           85.900          -11.01%        
+3       119.564           136.497          -12.41%        
+Branch  l1 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       9.400           6.071          +54.84%        
+2       91.247           85.900          +6.22%         
+3       148.966           136.497          +9.13%         
+Branch  l2 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       2.517           6.071          -58.53%        
+2       84.706           85.900          -1.39%         
+3       149.489           136.497          +9.52%         
+
+Direction Segment: $\Gamma \rightarrow$ K
+---------------------------------------------------------------------------
+Branch  l0 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       22.780           5.479          +315.75%       
+2       93.655           105.209          -10.98%        
+3       146.477           167.170          -12.38%        
+Branch  l1 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       10.380           5.479          +89.44%        
+2       111.704           105.209          +6.17%         
+3       182.395           167.170          +9.11%         
+Branch  l2 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       5.081           5.479          -7.27%         
+2       103.817           105.209          -1.32%         
+3       183.119           167.170          +9.54%         
+
+
+--- 2. OPTICAL BRANCH FREQUENCIES (EXACTLY AT GAMMA, NO REPETITION) ---
+---------------------------------------------------------------------------
+Comparison: l0 vs DFT-PBEsol
+Branch  l0 Freq        DFT-PBEsol (Ref)Rel. Diff      
+4       26.754 THz       26.196 THz      +2.13%         
+5       46.116 THz       48.012 THz      -3.95%         
+6       46.116 THz       48.012 THz      -3.95%         
+
+Comparison: l1 vs DFT-PBEsol
+Branch  l1 Freq        DFT-PBEsol (Ref)Rel. Diff      
+4       26.527 THz       26.196 THz      +1.27%         
+5       46.860 THz       48.012 THz      -2.40%         
+6       46.860 THz       48.012 THz      -2.40%         
+
+Comparison: l2 vs DFT-PBEsol
+Branch  l2 Freq        DFT-PBEsol (Ref)Rel. Diff      
+4       26.996 THz       26.196 THz      +3.05%         
+5       47.052 THz       48.012 THz      -2.00%         
+6       47.052 THz       48.012 THz      -2.00%         
+

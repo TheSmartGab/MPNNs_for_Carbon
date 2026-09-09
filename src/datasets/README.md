@@ -1,0 +1,1 @@
+This directory contains utilities for processing, inspecting, merging, modifying, requesting, and splitting atomic simulation datasets in extxyz format. These tools are essential for preparing data for training machine learning interatomic potentials (MACE, NequIP) or comparing with DFT reference calculations.

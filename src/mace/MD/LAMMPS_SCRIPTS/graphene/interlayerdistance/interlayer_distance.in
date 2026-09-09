@@ -1,0 +1,116 @@
+# ============================================================
+# GRAPHENE INTERLAYER DISTANCE SCAN - CLEANED VERSION
+# ============================================================
+
+# ---------- User variables ----------
+variable INPUT_CONFIG index "in.dat"
+variable MODEL        index "model.model"
+variable COLVAR_FILE  index "/home/gabri/Thesis/PROJECT/src/mace/MD/LAMMPS_SCRIPTS/graphene/com_distance.colvar"
+variable DUMP_DIR     index "DUMP"
+variable ENERGY_FILE  index "graphene_distance_scan.out"
+
+variable zmin   equal 1.0
+variable zmax   equal 7.0
+variable dz     equal 0.2
+variable nsteps equal floor((${zmax}-${zmin})/${dz})+1
+
+# ---------- Initial system setup ----------
+clear
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+atom_modify     map yes
+newton          on
+
+read_data       ${INPUT_CONFIG}
+
+mass            1 12.011
+labelmap        atom 1 C
+
+pair_style      mace no_domain_decomposition
+pair_coeff      * * ${MODEL} C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------- Define groups ----------
+region lower_region block INF INF INF INF -1 1.7 units box
+region upper_region block INF INF INF INF 0.5 50 units box
+
+group upper region upper_region
+group lower subtract all upper
+
+# ---------- Save group indices for Colvars ----------
+group2ndx mygroups.ndx lower upper
+
+# ---------- Compute center of mass (once!) ----------
+compute comL lower com
+compute comU upper com
+variable distance equal c_comU[3]-c_comL[3]
+run 0
+
+# ---------- Output header ----------
+print "# InterlayerDistance(A)   Potential_energy(eV)" file ${ENERGY_FILE}
+
+thermo 1
+thermo_style custom step v_distance pe fmax press
+
+# ============================================================
+# Distance scan loop
+# ============================================================
+variable i loop ${nsteps}
+label loop_start
+
+    reset_timestep 0
+    run 0
+    # Current COM distance
+    variable dz_current equal ${distance}
+    run 0
+
+    # Target separation
+    variable zsep equal ${zmin} + (${i}-1)*${dz}
+    run 0
+    variable dz_shift equal ${zsep} - v_dz_current
+    run 0
+
+    # Move upper layer to target z
+    displace_atoms upper move 0.0 0.0 ${dz_shift} units box
+
+    # set spring
+    fix comconstraint all colvars ${COLVAR_FILE}
+    fix_modify comconstraint config """
+    harmonic {
+        colvars com_dist_z
+        centers ${zsep}
+        forceConstant 1e3
+    }"""
+
+    # Output info
+    print "====================================="
+    print "Minimizing distance ${zsep}"
+    print "====================================="
+
+    # Dump for relaxation monitoring
+    dump relaxing all custom 1 ${DUMP_DIR}/relaxing_${zsep}.lammpstrj id type xu yu zu
+
+    # Energy minimization (no stiff spring needed if colvar handles constraint)
+    min_modify dmax 0.01
+    minimize 0 1e-8 200 2000
+
+    unfix comconstraint
+    undump relaxing
+
+    # Save relaxed structure
+    dump relaxed all custom 1 ${DUMP_DIR}/relaxed_${zsep}.lammpstrj id type xu yu zu
+    run 0
+    undump relaxed
+
+    # Log energy
+    variable pe equal pe
+    print "${zsep} ${pe}" append ${ENERGY_FILE}
+
+next i
+jump SELF loop_start
+
+print "Distance scan complete"

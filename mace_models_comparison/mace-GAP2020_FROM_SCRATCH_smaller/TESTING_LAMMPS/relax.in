@@ -1,0 +1,47 @@
+# ============================================================
+# Uniaxial tensile test of graphene using MACE (global virial)
+# ============================================================
+
+# ---------------- INITIALIZATION ----------------
+units           metal
+dimension       3
+boundary        p p f
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+# ---------------- ATOMS -------------------------
+read_data       2_layers_graphite.lammps-data
+
+mass            1 12.011
+labelmap        atom 1 C
+
+# ---------------- FORCE FIELD -------------------
+pair_style      mace no_domain_decomposition
+pair_coeff      1 1 ../MACE.model-lammps.pt C
+
+neighbor        1.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------------- SETTINGS ----------------------
+timestep        0.0005
+variable        ts equal 0.0005
+
+################################################
+# first, relax graphite cell
+group fully_constrained id 1
+
+fix cell_relax_contraints fully_constrained setforce 0 0 0
+fix cell_relax_box_relax all box/relax x 0 y 0 xy 0 couple xy nreset 10 fixedpoint 0 0 0
+
+thermo 1
+thermo_style custom lx ly lz pe press fmax
+dump cell_relax_dump all atom 1 "cell_relax.lammps-data"
+
+# compute upper atoms coordinates to access their relative position as initial guess of relative position for calculations in the loop
+
+reset_timestep  0
+minimize 0 1e-8 10000 100000
+unfix cell_relax_contraints
+unfix cell_relax_box_relax
+undump cell_relax_dump

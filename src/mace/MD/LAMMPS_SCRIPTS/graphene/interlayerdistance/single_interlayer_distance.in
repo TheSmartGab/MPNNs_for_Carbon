@@ -1,0 +1,102 @@
+# ============================================================
+# GRAPHENE INTERLAYER DISTANCE SCAN - CLEANED VERSION
+# ============================================================
+
+# ---------- User variables ----------
+variable INPUT_CONFIG index "in.dat"
+variable MODEL        index "model.model"
+variable DUMP_DIR     index "DUMP"
+variable ENERGY_FILE  index "graphene_distance_scan.out"
+
+variable zmin   equal 0.8
+variable zmax   equal 7.0
+variable dz     equal 0.025
+variable nsteps equal floor((${zmax}-${zmin})/${dz})+1
+
+# ---------- Initial system setup ----------
+clear
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+atom_modify     map yes
+newton          on
+
+read_data       ${INPUT_CONFIG}
+
+mass            1 12.011
+labelmap        atom 1 C
+
+pair_style      mace no_domain_decomposition
+pair_coeff      * * ${MODEL} C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------- Output header ----------
+print "# InterlayerDistance(A)   Potential_energy(eV)" file ${ENERGY_FILE}
+
+variable dz_current equal z[3] - z[2]
+
+thermo 1
+thermo_style custom step v_dz_current pe fmax press
+
+# constrained atoms 
+# fix distance between overlapped atoms in bermald stacking
+# check your input file to control the appropriate indexes!
+group constrained id 2 3
+# if you do not fix x and y forces to 0, the system will undergo phase transition at small separations with diamantification! (TODO: study this for bulk graphite)
+fix zconstraint constrained setforce 0 0 0
+
+# allow the other 2 atoms to move along z direction
+group xyconstrained id 1 4
+fix xycontraint xyconstrained setforce 0 0 NULL
+
+# upper and lower
+group lower id 1 2
+group upper id 3 4
+
+# ============================================================
+# Distance scan loop
+# ============================================================
+variable i loop ${nsteps}
+label loop_start
+
+    reset_timestep 0
+
+    # Target separation
+    variable zsep equal ${zmin} + (${i}-1)*${dz}
+    run 0
+    variable dz_shift equal ${zsep} - v_dz_current
+    run 0
+
+    # Move upper layer to target z
+    displace_atoms upper move 0.0 0.0 ${dz_shift} units box
+
+    # Output info
+    print "====================================="
+    print "Minimizing distance ${zsep}"
+    print "====================================="
+
+    # Dump for relaxation monitoring
+    dump relaxing all custom 1 ${DUMP_DIR}/relaxing_${zsep}.lammpstrj id type xu yu zu
+
+    # Energy minimization (no stiff spring needed if colvar handles constraint)
+    min_modify dmax 0.1
+    minimize 0 1e-8 200 2000
+
+    undump relaxing
+
+    # Save relaxed structure
+    dump relaxed all custom 1 ${DUMP_DIR}/relaxed_${zsep}.lammpstrj id type xu yu zu
+    run 0
+    undump relaxed
+
+    # Log energy
+    variable pe equal pe
+    print "${zsep} ${pe}" append ${ENERGY_FILE}
+
+next i
+jump SELF loop_start
+
+print "Distance scan complete"

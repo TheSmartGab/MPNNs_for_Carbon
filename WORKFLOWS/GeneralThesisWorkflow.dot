@@ -1,0 +1,98 @@
+digraph carbon_ml_workflow {
+    graph [
+        rankdir=UD
+        fontname="Helvetica"
+        splines=ortho
+        nodesep=0.5
+        ranksep=0.6
+        bgcolor="#f8f9fa"
+    ]
+    node [
+        fontname="Helvetica"
+        fontsize=60
+        margin="0.22,0.13"
+        style="filled,rounded"
+    ]
+    edge [
+        fontname="Helvetica"
+        fontsize=60
+        color="#94a3b8"
+        penwidth=1.5
+    ]
+
+    // ── Process nodes (indigo) ───────────────────────────────
+    node [shape=box, fillcolor="#e0e7ff", color="#4f46e5", fontcolor="#1e1b4b", penwidth=1.2]
+
+    A  [label="Physical problem\n(graphene mechanical failure)"]
+    B  [label="Dataset\nselection\n(DFT xc pseudopotential)"]
+    C  [label="Train\n(pretrain?)"]
+    F  [label="Physical benchmarks\n(2-body potential\nphonon bands\nPES projections)"]
+    I  [label="Gain model insight\n(hidden descriptors t-SNE)"]
+    J  [label="Production runs\n(graphene stability boundary\nLong MD runs\nArrhenius analysis)"]
+    K  [label="Comparison with\nexperiment\n(x-ray diffraction\nHRTEM microscopy)"]
+
+    // ── Corrective action nodes (amber) ──────────────────────
+    node [shape=box, fillcolor="#fef3c7", color="#b45309", fontcolor="#451a03", penwidth=1.2]
+    H  [label="Change\nhyperparameters"]
+    G2 [label="Extend\ndataset"]
+
+    // ── Decision diamonds (teal) ─────────────────────────────
+    node [shape=diamond, fillcolor="#ccfbf1", color="#0f766e", fontcolor="#042f2e",
+          margin="0.25,0.15", style="filled", penwidth=1.2]
+    D  [label="Metrics\nOK?\n(Rigorous benchmarks \nusing uncertanties)"]
+    E  [label="Physical Benchmarks\nOK?"]
+    G1 [label="Dataset\ncomplete?"]
+
+    // ── Yes / No connector circles ───────────────────────────
+    node [shape=circle, fontsize=60, margin="0.01,0.01", width=1.5, height=1.5,
+          style="filled", penwidth=1.0, fixedsize=true]
+
+    node [fillcolor="#bbf7d0", color="#15803d", fontcolor="#14532d", fontsize=60]
+    Dy  [label="yes"]
+    Ey  [label="yes"]
+    G1y [label="yes"]
+
+    node [fillcolor="#fecaca", color="#b91c1c", fontcolor="#7f1d1d", fontsize=60]
+    Dn  [label="no"]
+    En  [label="no"]
+    G1n [label="no"]
+
+    // ── Invisible routing helpers ─────────────────────────────
+    node [shape=point, width=0, height=0, style=invis]
+    LH [label=""]
+    LB [label=""]
+
+    // ── Main left-to-right spine ──────────────────────────────
+    A  -> B
+    B  -> C
+    C  -> D
+    D  -> Dy  [color="#15803d", penwidth=1.0]
+    Dy -> F
+    F  -> E
+    E  -> Ey  [color="#15803d", penwidth=1.0]
+    Ey -> I
+    I  -> J
+    I  -> K
+
+    // ── Metrics fail: loop back up to Train ──────────────────
+    D  -> Dn  [color="#b91c1c", penwidth=1.0]
+    Dn -> H
+    H  -> LH  [arrowhead=none, color="#b45309"]
+    LH -> C   [color="#b45309"]
+
+    // ── Benchmarks fail branch ────────────────────────────────
+    E   -> En  [color="#b91c1c", penwidth=1.0]
+    En  -> G1
+
+    G1  -> G1n [color="#b91c1c", penwidth=1.0]
+    G1n -> G2
+    G2  -> LB  [arrowhead=none, color="#b45309"]
+    LB  -> B   [color="#b45309"]
+
+    G1  -> G1y [color="#15803d", penwidth=1.0]
+    G1y -> H
+
+    // ── Force feedback nodes below the main spine ─────────────
+    { rank=same; C; H; LH }
+    { rank=same; B; G2; LB }
+}

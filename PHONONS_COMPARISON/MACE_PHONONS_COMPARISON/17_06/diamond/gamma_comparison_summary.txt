@@ -1,0 +1,144 @@
+===================================================================
+    GAMMA POINT PHONON BRANCHES SUMMARY (NON-REPEATED OPTICAL)
+===================================================================
+Reference Source (Last Element): DFT-PBEsol
+
+--- 1. ACOUSTIC BRANCH SOUND VELOCITIES (PER PATH SEGMENT) ---
+Direction Segment: $\Gamma \rightarrow$ X
+---------------------------------------------------------------------------
+Branch  v1 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       206.054           210.696          -2.20%         
+2       209.007           210.696          -0.80%         
+3       275.658           287.332          -4.06%         
+Branch  v1-cut Vel     DFT-PBEsol (Ref)Rel. Diff      
+1       202.563           210.696          -3.86%         
+2       203.648           210.696          -3.35%         
+3       273.903           287.332          -4.67%         
+Branch  v2 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       208.364           210.696          -1.11%         
+2       213.627           210.696          +1.39%         
+3       277.230           287.332          -3.52%         
+Branch  v2-l2 Vel      DFT-PBEsol (Ref)Rel. Diff      
+1       210.738           210.696          +0.02%         
+2       217.210           210.696          +3.09%         
+3       276.733           287.332          -3.69%         
+Branch  v3 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       210.586           210.696          -0.05%         
+2       214.076           210.696          +1.60%         
+3       271.732           287.332          -5.43%         
+Branch  v4 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       207.762           210.696          -1.39%         
+2       210.790           210.696          +0.04%         
+3       270.784           287.332          -5.76%         
+Branch  v5 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       205.694           210.696          -2.37%         
+2       208.809           210.696          -0.90%         
+3       283.975           287.332          -1.17%         
+
+Direction Segment: $\Gamma \rightarrow$ K
+---------------------------------------------------------------------------
+Branch  v1 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       149.286           154.571          -3.42%         
+2       171.674           172.065          -0.23%         
+3       242.102           246.419          -1.75%         
+Branch  v1-cut Vel     DFT-PBEsol (Ref)Rel. Diff      
+1       141.342           154.571          -8.56%         
+2       164.883           172.065          -4.17%         
+3       238.568           246.419          -3.19%         
+Branch  v2 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       149.795           154.571          -3.09%         
+2       175.802           172.065          +2.17%         
+3       247.254           246.419          +0.34%         
+Branch  v2-l2 Vel      DFT-PBEsol (Ref)Rel. Diff      
+1       153.542           154.571          -0.67%         
+2       179.535           172.065          +4.34%         
+3       248.166           246.419          +0.71%         
+Branch  v3 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       148.200           154.571          -4.12%         
+2       175.839           172.065          +2.19%         
+3       243.044           246.419          -1.37%         
+Branch  v4 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       146.140           154.571          -5.45%         
+2       172.628           172.065          +0.33%         
+3       240.773           246.419          -2.29%         
+Branch  v5 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       155.859           154.571          +0.83%         
+2       171.031           172.065          -0.60%         
+3       243.586           246.419          -1.15%         
+
+Direction Segment: $\Gamma \rightarrow$ L
+---------------------------------------------------------------------------
+Branch  v1 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       139.464           139.039          +0.31%         
+2       139.943           139.039          +0.65%         
+3       213.598           216.763          -1.46%         
+Branch  v1-cut Vel     DFT-PBEsol (Ref)Rel. Diff      
+1       128.113           139.039          -7.86%         
+2       128.420           139.039          -7.64%         
+3       210.734           216.763          -2.78%         
+Branch  v2 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       143.595           139.039          +3.28%         
+2       144.025           139.039          +3.59%         
+3       218.351           216.763          +0.73%         
+Branch  v2-l2 Vel      DFT-PBEsol (Ref)Rel. Diff      
+1       148.620           139.039          +6.89%         
+2       149.149           139.039          +7.27%         
+3       219.355           216.763          +1.20%         
+Branch  v3 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       140.923           139.039          +1.36%         
+2       141.250           139.039          +1.59%         
+3       215.397           216.763          -0.63%         
+Branch  v4 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       137.851           139.039          -0.85%         
+2       137.964           139.039          -0.77%         
+3       212.987           216.763          -1.74%         
+Branch  v5 Vel         DFT-PBEsol (Ref)Rel. Diff      
+1       142.299           139.039          +2.34%         
+2       142.901           139.039          +2.78%         
+3       213.360           216.763          -1.57%         
+
+
+--- 2. OPTICAL BRANCH FREQUENCIES (EXACTLY AT GAMMA, NO REPETITION) ---
+---------------------------------------------------------------------------
+Comparison: v1 vs DFT-PBEsol
+Branch  v1 Freq        DFT-PBEsol (Ref)Rel. Diff      
+4       38.427 THz       39.131 THz      -1.80%         
+5       38.427 THz       39.131 THz      -1.80%         
+6       38.428 THz       39.131 THz      -1.79%         
+
+Comparison: v1-cut vs DFT-PBEsol
+Branch  v1-cut Freq    DFT-PBEsol (Ref)Rel. Diff      
+4       38.281 THz       39.131 THz      -2.17%         
+5       38.281 THz       39.131 THz      -2.17%         
+6       38.282 THz       39.131 THz      -2.17%         
+
+Comparison: v2 vs DFT-PBEsol
+Branch  v2 Freq        DFT-PBEsol (Ref)Rel. Diff      
+4       38.273 THz       39.131 THz      -2.19%         
+5       38.273 THz       39.131 THz      -2.19%         
+6       38.274 THz       39.131 THz      -2.19%         
+
+Comparison: v2-l2 vs DFT-PBEsol
+Branch  v2-l2 Freq     DFT-PBEsol (Ref)Rel. Diff      
+4       38.563 THz       39.131 THz      -1.45%         
+5       38.564 THz       39.131 THz      -1.45%         
+6       38.564 THz       39.131 THz      -1.45%         
+
+Comparison: v3 vs DFT-PBEsol
+Branch  v3 Freq        DFT-PBEsol (Ref)Rel. Diff      
+4       38.363 THz       39.131 THz      -1.96%         
+5       38.363 THz       39.131 THz      -1.96%         
+6       38.365 THz       39.131 THz      -1.96%         
+
+Comparison: v4 vs DFT-PBEsol
+Branch  v4 Freq        DFT-PBEsol (Ref)Rel. Diff      
+4       38.359 THz       39.131 THz      -1.97%         
+5       38.359 THz       39.131 THz      -1.97%         
+6       38.360 THz       39.131 THz      -1.97%         
+
+Comparison: v5 vs DFT-PBEsol
+Branch  v5 Freq        DFT-PBEsol (Ref)Rel. Diff      
+4       38.241 THz       39.131 THz      -2.27%         
+5       38.241 THz       39.131 THz      -2.27%         
+6       38.242 THz       39.131 THz      -2.27%         
+

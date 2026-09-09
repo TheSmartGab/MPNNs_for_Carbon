@@ -1,0 +1,62 @@
+# compute energy vs lattice constant
+
+units metal
+dimension 3
+boundary p p p
+atom_style atomic
+atom_modify   map yes
+
+neighbor 0.1 bin
+neigh_modify delay 0 every 1 check yes one 100000 page 1000000
+
+# --- lattice ---
+lattice custom 1.0 &
+  a1 1 0 0 &
+  a2 0 1 0 &
+  a3 0 0 1 &
+  basis 0.0 0.0 0.0 &
+  basis 0.25 0.25 0.25 &
+  basis 0.75 0.75 0.25 &
+  basis 0.75 0.25 0.75 &
+  basis 0.25 0.75 0.75 &
+  basis 0.5 0.5 0.0 &
+  basis 0.0 0.5 0.5 &
+  basis 0.5 0.0 0.5
+
+region box block 0 1 0 1 0 1
+create_box 1 box
+create_atoms 1 box
+mass 1 12.011
+
+
+# --- potential ---
+pair_style mace no_domain_decomposition
+pair_coeff 1 1 ../MACE.model-lammps.pt C
+
+# --- scan parameters ---
+variable da equal 0.01
+variable n loop 1000
+
+thermo_style custom lx ly lz vol pe ke 
+thermo 1
+
+# dump trajdump all atom 1 diamond_e_lp.lammps-data
+
+label loop_a
+
+# scale factor relative to reference
+
+change_box all x delta 0 ${da} y delta 0 ${da} z delta 0 ${da} boundary p p p remap
+
+run 0
+variable V equal vol
+variable PE equal pe
+variable KE equal ke
+variable a equal lx
+variable b equal ly
+variable c equal lz
+print "${a} ${b} ${c} ${V} ${PE} ${KE}" append diamond_e_vs_lp.dat
+
+next n
+jump SELF loop_a
+

@@ -1,0 +1,10 @@
+colvarsTrajFrequency 0
+colvarsRestartFrequency 0
+
+colvar {
+  name com_dist
+  distance {
+    group1 { atomNumbersRange 1-60 }
+    group2 { atomNumbersRange 61-120 }
+  }
+}

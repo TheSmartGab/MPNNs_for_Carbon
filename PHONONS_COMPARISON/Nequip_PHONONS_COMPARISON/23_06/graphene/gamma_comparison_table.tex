@@ -1,0 +1,21 @@
+% ---- LaTeX Table Code for Gamma Point Comparison ----
+\begin{table}[htbp]
+  \centering
+  \caption{Relative discrepancies (\%) of calculated phonon profiles relative to the reference \textbf{DFT-PBEsol}. Acoustic rows present un-repeated group sound velocities evaluated along specific path projections using a constrained polynomial approach ($f(k) = c_1 k + c_2 k^2 + c_3 k^3 + c_4 k^4$). Optical branches are evaluated strictly at the isotropic $\Gamma$ structural intercept, removing structural path repetition.}
+  \label{tab:gamma_phonon_comparison}
+  \begin{tabular}{cccccc}
+    \hline\hline
+    Path / Domain & Branch & Property Type  & l0 & l1 & l2 \\
+    \hline
+    \midrule $\Gamma \rightarrow$ M & 1 & Acoustic Velocity  & +203.99\% & +54.84\% & -58.53\% \\
+                                   & 2 & Acoustic Velocity  & -11.01\% & +6.22\% & -1.39\% \\
+                                   & 3 & Acoustic Velocity  & -12.41\% & +9.13\% & +9.52\% \\
+    \midrule $\Gamma \rightarrow$ K & 1 & Acoustic Velocity  & +315.75\% & +89.44\% & -7.27\% \\
+                                   & 2 & Acoustic Velocity  & -10.98\% & +6.17\% & -1.32\% \\
+                                   & 3 & Acoustic Velocity  & -12.38\% & +9.11\% & +9.54\% \\
+    \midrule Exact $\Gamma$-point  & 4 & Optical Frequency   & +2.13\% & +1.27\% & +3.05\% \\
+                                   & 5 & Optical Frequency   & -3.95\% & -2.40\% & -2.00\% \\
+                                   & 6 & Optical Frequency   & -3.95\% & -2.40\% & -2.00\% \\
+    \hline\hline
+  \end{tabular}
+\end{table}

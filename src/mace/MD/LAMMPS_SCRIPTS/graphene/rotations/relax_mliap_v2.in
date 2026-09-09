@@ -1,0 +1,86 @@
+# ============================================================
+# Relax single fullerene
+# ============================================================
+
+variable INPUT_CONFIG index "in.dat"
+variable MODEL index "model.model"
+variable DUMP index "dump.dump"
+variable OUT_FILE index "relaxed.lammps-data"
+
+variable NRUN index 100000
+variable timestep index 0.001 # timestep
+variable viscous index 2.0 # viscous coefficient
+
+variable NDUMP index 1000
+variable NTHERMO index 100
+
+units           metal
+dimension       3
+boundary        p p f
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+print "==========================================="
+print "READING DATA"
+read_data       ${INPUT_CONFIG}
+print "==========================================="
+
+mass            1 12.011
+
+print "==========================================="
+print "READING MODEL"
+pair_style      mliap unified ${MODEL} 0
+pair_coeff      * * C
+print "==========================================="
+
+neighbor        0.2 bin
+neigh_modify    delay 0 every 1 check yes
+
+timestep        ${timestep}
+
+thermo          ${NTHERMO}
+thermo_style    custom step pe ke etotal fmax
+
+dump        relax_dump all custom ${NDUMP} ${DUMP} id type x y z vx vy vz fx fy fz 
+
+#######################
+# parameters 
+
+# lower and upper layer
+variable zminlow equal 49
+variable zmaxlow equal 51
+variable zminhigh equal 52
+variable zmaxhigh equal 54
+
+region lowerreg block INF INF INF INF ${zminlow} ${zminhigh}
+region upperreg block INF INF INF INF ${zminhigh} ${zmaxhigh}
+
+group lowergr region lowerreg
+group uppergr region upperreg 
+
+###########################
+# Remove rigid-body DOF per layer
+# Preserves relative roto-translation during minimization
+
+fix lowerdof lowergr momentum 1 linear 1 1 0 angular
+fix upperdof uppergr momentum 1 linear 1 1 0 angular
+
+print "==========================================="
+print "RELAXATION START"
+reset_timestep  0
+
+#fix cell_relax_box_relax all box/relax x 0 y 0 xy 0 couple xy nreset 10 fixedpoint 0 0 0 # can be used only for triclinic
+#fix cell_relax_box_relax all box/relax x 0 y 0 nreset 10 fixedpoint 0 0 0
+
+
+fix integrator all nve
+fix 2 all viscous ${viscous}
+
+run ${NRUN}
+
+undump relax_dump
+print "==========================================="
+
+write_data ${OUT_FILE}
+print           "Relaxation Done"

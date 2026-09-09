@@ -1,0 +1,54 @@
+variable MODEL_FILE index "model.pt"
+variable OUTPUT_FILE index "out.dat"
+
+units         	metal
+atom_style    	atomic
+dimension 3
+atom_modify   	map yes
+newton        	on
+boundary	f f f
+
+# Simulation box
+lattice none 1.0
+region box block 0 100 0 100 0 100
+create_box 1 box
+
+# Two atoms: one fixed, one movable
+create_atoms 1 single 5.0 5.0 5.0
+create_atoms 1 single 6.0 5.0 5.0
+
+mass       1 12.011
+labelmap   atom 1 C
+
+pair_style mace no_domain_decomposition
+pair_coeff * * ${MODEL_FILE} C
+
+neighbor   0.3 bin
+neigh_modify delay 0 every 1 check yes
+
+#  PARAMETERS
+variable d0     equal 0.01       # starting distance (Å)
+variable step   equal 0.01      # step size (Å)
+variable N      equal 1000       # number of steps
+
+shell echo "# distance(A)   potential_energy(eV)" > ${OUTPUT_FILE}
+
+#  LOOP
+variable i loop ${N}
+label loop_start
+
+    variable d equal ${d0} + (${i}-1)*${step}
+
+    # move atom 2 to (5+d, 5, 5)
+    set atom 2 x $(5.0+v_d) y 5.0 z 5.0
+
+    run 0 post no
+    variable pe equal pe
+
+    print "${d} ${pe}" append ${OUTPUT_FILE}
+
+next i
+jump SELF loop_start
+
+#  DONE
+print "Finished scanning distances."

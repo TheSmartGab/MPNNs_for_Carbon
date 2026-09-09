@@ -1,0 +1,7 @@
+This run comes from an off by one error
+the restart 190000 is actually at strain 0.19 rather than 0.20
+From that frame, I started a loing simulation of 1e6 steps, and took 100 configurations, one each 1000 steps.
+To make these independent, I ran other 1000 steps at 0.19 strain, then increased increased it 
+The script logic assumed I was at strain 0.20, and had to increase to 0.21
+The actual strain is 0.19 * 0.21 / 0.2 - 1 = 0.19991666666666 ...
+This data can be actually used to infer breaking rate at this strain 

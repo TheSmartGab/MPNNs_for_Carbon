@@ -1,0 +1,60 @@
+# ============================================================
+# Relax single fullerene
+# ============================================================
+
+variable INPUT_CONFIG index "in.dat"
+variable MODEL index "model.model"
+variable DUMP index "dump.dump"
+variable OUT_FILE index "relaxed.lammps-data"
+
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+print "==========================================="
+print "READING DATA"
+read_data       ${INPUT_CONFIG}
+print "==========================================="
+
+
+mass            1 12.011
+labelmap        atom 1 C
+
+print "==========================================="
+print "READING MODEL"
+pair_style      mace no_domain_decomposition
+pair_coeff      * * ${MODEL} C
+print "==========================================="
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        0.001
+
+thermo          1
+thermo_style    custom step pe fmax
+
+dump        relax_dump all custom 10 ${DUMP} id type xu yu zu
+
+print "==========================================="
+print "RELAXATION START"
+reset_timestep  0
+group constrained id 1
+fix constrain constrained setforce 0 0 0
+
+min_style fire
+minimize        0 1e-6 1000 10000
+
+
+#fix cell_relax_box_relax all box/relax x 0 y 0 xy 0 couple xy nreset 10 fixedpoint 0 0 0 # can be used only for triclinic
+fix cell_relax_box_relax all box/relax x 0 y 0 nreset 10 fixedpoint 0 0 0
+min_style cg 
+minimize 0 1e-6 1000 10000
+undump relax_dump
+print "==========================================="
+
+write_data ${OUT_FILE}
+print           "Relaxation Done"

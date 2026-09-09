@@ -1,0 +1,118 @@
+name: MACE #name and output
+seed: 2731 # ranodm seed
+
+model: MACE
+# MACE: default
+# ScaleShiftMACE: more accurate, but incorrect for isolated atoms
+# AtomicDipolesMACE: train on dipole moments
+# EnergyDipolesMACE: dipoles and energies
+
+#######################################################
+# FILES
+# support ASE, HDF5, LMDB
+# can provide multiple files, even for multiple formats as
+# heads: 
+#   DFT:
+#     train_file: ["path/to/training1.xyz", "path/to/training2.xyz"]
+#     valid_file: ["path/to/validation1.xyz", "path/to/validation2/"]
+#     test_file: "path/to/test.xyz"
+
+heads:
+  DFT:
+    train_file: ../../../../DATASETS/C/nomad/MLIP_C2_MERGED/MLIP1000_C2all/split/training/training.extxyz
+    valid_file: ../../../../DATASETS/C/nomad/MLIP_C2_MERGED/MLIP1000_C2all/split/validation/ALL.extxyz
+      #- /Users/tesisti/gabriele_colombo/PROJECT/DATASETS/C/nomad/MLIP_C2_MERGED/MLIP1000_C2all/split/validation/C2.extxyz
+      #- /Users/tesisti/gabriele_colombo/PROJECT/DATASETS/C/nomad/MLIP_C2_MERGED/MLIP1000_C2all/split/validation/GRAPHENE.extxyz
+      #- /Users/tesisti/gabriele_colombo/PROJECT/DATASETS/C/nomad/MLIP_C2_MERGED/MLIP1000_C2all/split/validation/ALL.extxyz
+    test_file: ../../../../DATASETS/C/nomad/MLIP_C2_MERGED/MLIP1000_C2all/split/test/ALL.extxyz
+
+######################################################
+# TRAINING PARAMETERS
+
+#start_stage_two: 1200
+max_num_epochs: 500
+batch_size: 64
+
+# EARLY STOPPING
+patience: 50
+# LR scheduler
+scheduler: ReduceLROnPlateau # ReduceLROnPlateau or ExponentialLR. for the first one, use lr_factor, for the second one, lr_scheduler_gamma
+lr: 0.01
+lr_factor: 0.5 # for ReduceLROnPlateau, reduce the lr by this much if plateau is found
+scheduler_patience: 10 # this works only for ReduceLROnPlateau
+# lr_scheduler_gamma: 0.993 # gamma parameter of learning rate scheduler. it is the factor by wich the learning rate is divided after the patience number of epochs
+# OPTIMIZER
+optimizer: adam
+beta: 0.9
+ema: true # use exponential moving average. helps smoothing out validation curves
+ema_decay: 0.99 # 
+amsgrad: true # use amsgrad variation of adam. slightly different, should not change much
+
+# loss
+loss: virials # virials give energy, force, stress/virial
+weight_decay: 0
+
+# quality of life plotting
+plot_frequency: 50 # plot training results every N epochs
+error_table: PerAtomRMSEstressvirials # error table to plot at the end of training
+######################################################
+# VALIDATION and TESTING
+valid_batch_size: 64
+eval_interval: 5
+
+# GENERAL MODEL PARAMETERS
+#######################################################
+# ISOLATED ENERGIES
+E0s:
+  6: -0.1773401310521379 # does not accept literal C for some reason. this value was computed for the GPAW MLIP training set for graphene
+
+# PAIR REPULSION
+pair_repulsion: true # whether to use ZBL pair repulsion. This should really help at smaller distances by suggesting the right behaviour
+
+# READDOUT
+MLP_irreps: 16x0e # irreps of readout
+gate: silu # silu, tanh, abs, None . nonlinearity applied in last readout. usefull to attempt to include higher body order, although not completely.
+
+#######################################################
+# MESSAGES
+# number of channels x irrep order x parity [e|o]
+# all irreps must have same number of channels
+hidden_irreps: 16x0e + 16x1o + 16x2e # irreps of hidden features
+# number of message passing layers
+num_interactions: 2
+# MAX_L: 2 # max L of equivariant message, this should be overwritten by the hidden_irreps
+
+#######################################################
+# layers
+correlation: 3 # total correlation order is correlation*(num_interaction + 1) - 1, correlation 3 means body order 4 in 1 layer, then account for central atom coordidnate ddegeneracy in further layers contributions
+edge_irreps: 16x0e + 16x1o + 16x2e # irreps of edges. should overwrite max_ell and num_channels
+# max_ell: 2 # max l of spherical harmonics
+# num_channels: 16
+r_max: 5
+radial_type: bessel # basis radial function to use
+num_cutoff_basis: 8 # number of basis functions to use, default is 5! (a bit low I'd say)
+radial_MLP: "[16, 16]"
+
+
+#######################################################
+# data keys
+# keywords in frame preamble
+# default values are reported below
+energy_key: energy
+energy_weight: 1
+forces_key: forces
+forces_weight: 1
+compute_stress: true
+stress_weight: 1
+stress_key: stress
+# virials_key
+# dipole_key
+# config_stress_weights = 0 # to ignore stresses for heterogeneous datasets
+scaling: rms_forces_scaling # scaling of input data
+
+#######################################################
+# device and dtype
+default_dtype: float32 # x2 speedup compared to float64
+device: cpu
+distributed: no
+launcher: none # what launches the program, may change to slurm on HPC cluster

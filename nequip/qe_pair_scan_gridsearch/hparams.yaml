@@ -1,0 +1,5 @@
+training_module.model.radial_mlp_depth: [1,2]
+training_module.model.radial_mlp_width: [8,16,32]
+training_module.model.num_features: [8, 16, 32]
+training_module.model.num_bessels: [8, 16]
+training_module.model.l_max: [0, 1]

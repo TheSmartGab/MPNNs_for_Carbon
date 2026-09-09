@@ -1,0 +1,20 @@
+colvarsTrajFrequency 0
+colvarsRestartFrequency 0
+indexFile mygroups.ndx   # must come before colvar definitions
+units metal
+
+colvar {
+  width 0.01
+  name com_dist_z
+  distanceZ {
+    main {
+      indexGroup upper
+    }
+    ref {
+      indexGroup lower
+    }
+    axis (0.0,0.0,1.0)
+    forceNoPBC yes
+  }
+}
+

@@ -1,0 +1,95 @@
+# ============================================================
+# Uniaxial tensile test of graphene using MACE (global virial)
+# ============================================================
+
+# ---------------- INITIALIZATION ----------------
+units           metal
+dimension       3
+boundary        p p f
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+# ---------------- ATOMS -------------------------
+read_data       small_graphene.data
+
+mass            1 12.011
+labelmap        atom 1 C
+
+# ---------------- FORCE FIELD -------------------
+pair_style      mace no_domain_decomposition
+pair_coeff      1 1 ../MACE.model-lammps.pt C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------------- SETTINGS ----------------------
+timestep        0.001
+variable        ts equal 0.001
+
+# ---------------- GLOBAL STRESS (NO atom_virial!) ----------
+compute         p all pressure thermo_temp
+
+# ---------------- GEOMETRY VARIABLES -------------
+variable        Lx equal lx
+variable        Ly equal ly
+variable        Lz equal lz
+variable        Vol equal vol
+
+# effective graphene thickness (Å)
+variable        thickn equal 3.4
+
+# ---------------- RELAXATION ---------------------
+reset_timestep  0
+velocity all create 300.0 1009 mom yes rot yes dist gaussian
+run 0
+velocity all scale 300.0
+
+fix             1 all npt temp 300 300 0.01 x 0 0 0.1 y 0 0 0.1 couple none
+
+thermo          100
+thermo_style    custom step temp pe ke etotal lx ly press
+
+dump            1 all custom 100 thermalization.lammpstrj id type x y z vx vy vz fx fy fz
+run             1000
+
+undump 1
+unfix           1
+
+# ---------------- DEFORMATION --------------------
+reset_timestep  0
+
+fix             1 all npt temp 300 300 0.01 x 0 0 0.05 couple none
+
+variable        srate equal 2.0e10
+variable        srate1 equal ${srate}/1.0e12
+
+fix             2 all deform 1 y erate ${srate1} units box remap x
+
+# ---------------- STRESS–STRAIN ------------------
+
+# pressure tensor components (bar)
+variable        pxx equal c_p[1]
+variable        pyy equal c_p[2]
+
+# 2D normalization
+variable        CorVol equal v_Lx*v_Ly*v_thickn
+variable        Conv equal 1.0e-4      # bar → GPa
+
+# stresses (GPa)
+variable        sigmaxx equal -v_pxx*v_Conv*v_Vol/v_CorVol
+variable        sigmayy equal -v_pyy*v_Conv*v_Vol/v_CorVol
+
+# strain
+variable        StrainPerTs equal v_srate1*v_ts
+variable        strain equal step*v_StrainPerTs
+
+thermo          100
+thermo_style    custom step temp v_strain v_sigmaxx v_sigmayy pe ke lx ly
+
+dump            2 all custom 100 tensile_test.lammpstrj id type x y z vx vy vz fx fy fz
+
+run             25000
+
+# ---------------- END ----------------------------
+

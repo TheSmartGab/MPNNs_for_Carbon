@@ -1,0 +1,26 @@
+model_details:
+  channels: 32
+  max_L: 1
+  layers: 2
+  correlation_order: 3
+  spherical_harmonics_l: 3
+  radial_functions: 10
+  basis_functions: 5
+  radial_cutoff_A: 6.0
+  total_receptive_field_A: 12.0
+  hidden_irreps: 32x0e + 32x1o
+  total_parameters: 39120
+loss_function:
+  type: WeightedEnergyForcesStressLoss
+  weights:
+    energy_weight: 1.0
+    forces_weight: 1.0
+    stress_weight: 1.0
+optimizer_information:
+  optimizer: ADAM
+  batch_size: 8
+  ema_decay: 0.99
+  gradient_updates: 53287
+  learning_rate: 0.005
+  weight_decay: 5.0e-07
+  gradient_clipping_tolerance: 10.0

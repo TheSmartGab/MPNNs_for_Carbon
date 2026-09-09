@@ -1,0 +1,24 @@
+variable INPUT_DATA index "input.xyz"
+variable OUTPUT_DATA index "force.*"
+variable MODEL_FILE index "model.pth"
+
+units	metal
+atom_style atomic
+dimension 3
+
+# set newton on for pair_allegro (off for pair_nequip)
+newton off
+boundary p p p
+
+read_data ${INPUT_DATA}
+
+labelmap atom 1 C  
+mass C 12.011
+
+# nequip pair style
+pair_style	nequip
+pair_coeff	* * ${MODEL_FILE} C
+
+dump phonopy all custom 1 ${OUTPUT_DATA} id type x y z fx fy fz
+dump_modify phonopy format line "%d %d %15.8f %15.8f %15.8f %15.8f %15.8f %15.8f"
+run 0

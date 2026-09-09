@@ -1,0 +1,89 @@
+print "==========================================="
+print "run_langevin_mliap.in begins"
+print "==========================================="
+
+
+# Thermalize a system at give temperature
+# This script does not initialize velocities
+# usefull to continue a previous thermalization
+# variables to controll the system
+variable TEMP index 300
+variable MODEL index "MACE.model"
+variable DUMPFILE index "thermalize.dump"
+variable OUT_CONFIG index "thermalized.lammps-data"
+variable INPUT_CONFIG index "input.lammpsdata"
+
+# some additional options
+variable SEED index 1009 # can make independent thermalizations
+# time variables
+# the defaults are consistent with each other, meaning tdamp is 1000 times the timestep, and 10000 timesteps are performed. Change these variables sensibely
+variable timestep index 0.001 #defaults to fs, change if reasonable to do so
+variable tdamp index 1.0 # damping time for thermalization
+variable nsteps index 100000 # steps to thermalize
+
+# control how often to log information
+variable nthermo index 1
+variable ndump index 1000
+
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+print "==========================================="
+print "READING DATA"
+read_data ${INPUT_CONFIG}
+print "==========================================="
+
+mass            1 12.011
+labelmap        atom 1 C
+
+print "==========================================="
+print "READING MODEL"
+pair_style      mace no_domain_decomposition
+pair_coeff      * * ${MODEL} C
+print "==========================================="
+
+print "==========================================="
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        ${timestep}
+
+# computes
+compute temp_compute  all temp
+compute press_compute all pressure temp_compute
+
+# thermo style. print each step, then do data blocking in postprocessing
+thermo          ${nthermo}
+thermo_style    custom step temp pe ke etotal press &
+    c_press_compute[1] c_press_compute[2] c_press_compute[3] &
+    c_press_compute[4] c_press_compute[5] c_press_compute[6] &
+
+# write trajectory every 
+dump        dump_thermo all custom ${ndump} ${DUMPFILE} id type x y z vx vy vz fx fy fz
+
+fix dyn         all nve
+
+fix thermostat	all langevin &
+			${TEMP} ${TEMP} ${tdamp} ${SEED} zero yes
+
+# remove COM motion
+compute temp_com all temp/com
+fix_modify thermostat temp temp_com
+fix removeCOM all momentum 1 linear 1 1 1
+
+print "==========================================="
+print "THERMALIZATION START"
+run ${nsteps}
+
+print "THERMALIZATION ENDS"
+print "SAVING LAST CONFIGURATION"
+write_data ${OUT_CONFIG} 
+
+print "==========================================="
+print "run_langevin_mliap.in ends"
+print "==========================================="

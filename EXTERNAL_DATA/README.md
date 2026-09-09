@@ -1,0 +1,1 @@
+This directory contains additional external data I did not obtain myself. the DFT phonon calculations are used as reference for the models, while IVOR contain the MACE model from  https://doi.org/10.1021/acs.inorgchem.5c01115 .

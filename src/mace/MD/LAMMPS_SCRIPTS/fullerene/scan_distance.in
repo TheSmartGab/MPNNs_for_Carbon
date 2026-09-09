@@ -1,0 +1,124 @@
+# ============================================================
+# Fullerene–fullerene interaction scan (COM-constrained)
+# ============================================================
+
+# ---------- User variables ----------
+variable INPUT_CONFIG index "in.dat"
+variable MODEL        index "model.model"
+variable COLVAR_FILE  index "/home/gabri/Thesis/PROJECT/src/mace/MD/LAMMPS_SCRIPTS/fullerene/com_distance.colvar"
+variable DUMP_DIR     index "DUMP"
+variable ENERGY_FILE  index "fullerene_distance_scan.out"
+
+variable zmin   equal 8.0
+variable zmax   equal 25.0
+variable dz     equal 0.5
+variable nsteps equal floor((${zmax}-${zmin})/${dz})+1
+
+# ---------- Initial system setup ----------
+clear
+units           metal
+dimension       3
+boundary        s s s
+atom_style      atomic
+atom_modify     map yes
+newton          on
+
+read_data       ${INPUT_CONFIG}
+read_data       ${INPUT_CONFIG} add append offset 0 0 0 0 0
+
+mass            1 12.011
+labelmap        atom 1 C
+
+pair_style      mace no_domain_decomposition
+pair_coeff      * * ${MODEL} C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------- Define molecules ----------
+variable natoms equal count(all)
+variable mol1_max_id equal ${natoms}/2
+
+group mol1 id <= ${mol1_max_id}
+group mol2 subtract all mol1
+
+# ---------- Write reference restart ----------
+run 0
+write_restart reference.restart
+
+# ---------- Output header ----------
+print "# COM_distance(A)   Potential_energy(eV)" file ${ENERGY_FILE}
+
+# ============================================================
+# Distance scan loop
+# ============================================================
+
+variable i loop ${nsteps}
+label loop_start
+
+    clear
+    units           metal
+    dimension       3
+    boundary        s s s
+    atom_style      atomic
+    atom_modify     map yes
+    newton          on
+
+    read_restart reference.restart
+
+    pair_style      mace no_domain_decomposition
+    pair_coeff      * * ${MODEL} C
+
+    neighbor        2.0 bin
+    neigh_modify    every 1 delay 0 check yes
+
+    group mol1 id <= ${mol1_max_id}
+    group mol2 subtract all mol1
+
+    variable zsep equal ${zmin} + (${i}-1)*${dz}
+    variable cv_dist equal ${zsep}
+
+    displace_atoms mol2 move 0.0 0.0 ${zsep} units box
+
+    # ---------- Constrain COM–COM distance ----------
+    fix comconstraint all colvars ${COLVAR_FILE}
+    fix_modify comconstraint config """
+    harmonic {
+        colvars com_dist
+        centers ${zsep}
+        targetCenters ${zsep}
+        forceConstant 1e5
+        targetNumSteps 1
+    }"""
+
+    # ---------- Monitor distance ----------
+    compute com1 mol1 com
+    compute com2 mol2 com
+    variable distance equal sqrt((c_com1[1]-c_com2[1])^2 + (c_com1[2]-c_com2[2])^2 + (c_com1[3]-c_com2[3])^2)
+
+    thermo 1
+    thermo_style custom step pe v_distance
+    run 0   # initialize computes and fix
+
+
+    # ---------- Energy minimization ----------
+    print "====================================="
+    print "Minimizing distance ${zsep}"
+    print "====================================="
+
+    dump relaxing all atom 1 ${DUMP_DIR}/relaxing_${zsep}.lammpstrj
+
+    minimize 0 1e-6 200 2000
+    unfix comconstraint
+    undump relaxing
+
+    # ---------- Output ----------
+    write_dump all atom ${DUMP_DIR}/relaxed_${zsep}.lammpstrj
+
+    variable pe equal pe
+    print "${zsep} ${pe}" append ${ENERGY_FILE}
+
+next i
+jump SELF loop_start
+
+print "Distance scan complete"

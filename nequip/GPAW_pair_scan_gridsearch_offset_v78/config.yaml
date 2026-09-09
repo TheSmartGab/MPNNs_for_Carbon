@@ -1,0 +1,117 @@
+run:
+- train
+- val
+- test
+cutoff_radius: 5.0
+chemical_symbols:
+- C
+model_type_names: ${chemical_symbols}
+data:
+  _target_: nequip.data.datamodule.ASEDataModule
+  seed: 456
+  train_file_path: ../../../DATASETS/C/nomad/GRAPHENE_MLIP_GPAW_COMPLEMENTS/C2_f_cutoff_100/all/split/training/training.extxyz
+  val_file_path: ../../../DATASETS/C/nomad/GRAPHENE_MLIP_GPAW_COMPLEMENTS/C2_f_cutoff_100/all/split/validation/validation.extxyz
+  test_file_path: ../../../DATASETS/C/nomad/GRAPHENE_MLIP_GPAW_COMPLEMENTS/C2_f_cutoff_100/all/split/test/test.extxyz
+  ase_args:
+    format: extxyz
+  transforms:
+  - _target_: nequip.data.transforms.NeighborListTransform
+    r_max: ${cutoff_radius}
+  - _target_: nequip.data.transforms.ChemicalSpeciesToAtomTypeMapper
+    model_type_names: ${model_type_names}
+    chemical_species_to_atom_type_map: ${list_to_identity_dict:${model_type_names}}
+  train_dataloader:
+    _target_: torch.utils.data.DataLoader
+    batch_size: 8
+    num_workers: 8
+    shuffle: true
+  val_dataloader:
+    _target_: torch.utils.data.DataLoader
+    batch_size: 8
+    num_workers: ${data.train_dataloader.num_workers}
+  test_dataloader: ${data.val_dataloader}
+  stats_manager:
+    _target_: nequip.data.CommonDataStatisticsManager
+    dataloader_kwargs:
+      batch_size: 8
+    type_names: ${model_type_names}
+trainer:
+  _target_: lightning.Trainer
+  accelerator: auto
+  enable_checkpointing: true
+  max_epochs: 500
+  max_time: 00:00:30:00
+  log_every_n_steps: 1
+  logger:
+    _target_: lightning.pytorch.loggers.csv_logs.CSVLogger
+    name: logger
+    save_dir: ./
+    flush_logs_every_n_steps: 100
+  callbacks:
+  - _target_: lightning.pytorch.callbacks.EarlyStopping
+    monitor: val0_epoch/weighted_sum
+    min_delta: 1e-3
+    patience: 25
+  - _target_: lightning.pytorch.callbacks.ModelCheckpoint
+    monitor: val0_epoch/weighted_sum
+    dirpath: /home/gabri/Thesis/PROJECT/nequip/GPAW_pair_scan_gridsearch_offset/v78/checkpoints
+    filename: best
+    save_last: true
+  - _target_: lightning.pytorch.callbacks.LearningRateMonitor
+    logging_interval: epoch
+training_module:
+  _target_: nequip.train.EMALightningModule
+  ema_decay: 0.999
+  loss:
+    _target_: nequip.train.EnergyForceStressLoss
+    per_atom_energy: true
+    coeffs:
+      total_energy: 1.0
+      forces: 1.0
+      stress: 1.0
+  val_metrics:
+    _target_: nequip.train.EnergyForceStressMetrics
+    coeffs:
+      total_energy_mae: 1.0
+      forces_mae: 1.0
+      stress_mae: 1.0
+  train_metrics: ${training_module.val_metrics}
+  test_metrics: ${training_module.val_metrics}
+  optimizer:
+    _target_: torch.optim.Adam
+    lr: 0.03
+  lr_scheduler:
+    scheduler:
+      _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+      factor: 0.6
+      patience: 10
+      threshold: 0.2
+      min_lr: 1e-6
+    monitor: val0_epoch/weighted_sum
+    interval: epoch
+    frequency: 1
+  model:
+    _target_: nequip.model.NequIPGNNModel
+    seed: 456
+    model_dtype: float32
+    type_names: ${model_type_names}
+    r_max: ${cutoff_radius}
+    num_bessels: 8
+    bessel_trainable: true
+    polynomial_cutoff_p: 6
+    num_layers: 1
+    l_max: 0
+    parity: false
+    num_features: 16
+    radial_mlp_depth: 2
+    radial_mlp_width: 32
+    avg_num_neighbors: ${training_data_stats:num_neighbors_mean}
+    per_type_energy_scales: ${training_data_stats:per_type_forces_rms}
+    per_type_energy_shifts:
+      C: -0.1773401310521379
+    per_type_energy_scales_trainable: false
+    per_type_energy_shifts_trainable: false
+    pair_potential:
+      _target_: nequip.nn.pair_potential.ZBL
+      units: metal
+      chemical_species: ${chemical_symbols}

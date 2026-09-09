@@ -1,0 +1,189 @@
+# Here I report the core hyperparameters of the models obtained via extract_hypers.py
+
+
+from_C2_cut:
+  model_details:
+    layers: 2
+    correlation_order: 3
+    spherical_harmonics_l: 3
+    radial_cutoff_A: 6.0
+    total_receptive_field_A: 12.0
+    total_parameters: 355098
+    radial_nn_architecture: FullyConnectedNet[10, 64, 64, 64, 512]
+  loss_function:
+    type: WeightedEnergyForcesStressLoss
+    weights:
+      energy_weight: 1.0
+      forces_weight: 1.0
+      stress_weight: 1.0
+  optimizer_information:
+    optimizer: ADAM
+    batch_size: 8
+    ema_decay: 0.99
+    gradient_updates: 51800
+    learning_rate: 0.001
+    weight_decay: 0.0
+    gradient_clipping_tolerance: 10.0
+from_C2_v1:
+  model_details:
+    layers: 2
+    correlation_order: 3
+    spherical_harmonics_l: 3
+    radial_cutoff_A: 6.0
+    total_receptive_field_A: 12.0
+    total_parameters: 355098
+    radial_nn_architecture: FullyConnectedNet[10, 64, 64, 64, 512]
+  loss_function:
+    type: WeightedEnergyForcesStressLoss
+    weights:
+      energy_weight: 1.0
+      forces_weight: 1.0
+      stress_weight: 1.0
+  optimizer_information:
+    optimizer: ADAM
+    batch_size: 8
+    ema_decay: 0.99
+    gradient_updates: 0
+    learning_rate: 0.001
+    weight_decay: 5.0e-07
+    gradient_clipping_tolerance: 10.0
+mace-GAP2020-FROM_SCRATCH_v3:
+  model_details:
+    channels: 128
+    max_L: 1
+    layers: 2
+    correlation_order: 3
+    spherical_harmonics_l: 3
+    radial_functions: 10
+    basis_functions: 5
+    radial_cutoff_A: 6.0
+    total_receptive_field_A: 12.0
+    hidden_irreps: 128x0e + 128x1o
+    total_parameters: 296592
+    radial_nn_architecture: FullyConnectedNet[10, 32, 32, 512]
+  loss_function:
+    type: WeightedEnergyForcesStressLoss
+    weights:
+      energy_weight: 1.0
+      forces_weight: 10.0
+      stress_weight: 100.0
+  optimizer_information:
+    optimizer: ADAM
+    batch_size: 8
+    ema_decay: 0.99
+    gradient_updates: 53287
+    learning_rate: 0.005
+    weight_decay: 0.0
+    gradient_clipping_tolerance: 10.0
+mace-GAP2020-FROM_SCRATCH_v4:
+  model_details:
+    channels: 64
+    max_L: 1
+    layers: 2
+    correlation_order: 3
+    spherical_harmonics_l: 3
+    radial_functions: 10
+    basis_functions: 5
+    radial_cutoff_A: 6.0
+    total_receptive_field_A: 12.0
+    hidden_irreps: 64x0e + 64x1o
+    total_parameters: 98128
+    radial_nn_architecture: FullyConnectedNet[10, 16, 16, 256]
+  loss_function:
+    type: WeightedEnergyForcesStressLoss
+    weights:
+      energy_weight: 1.0
+      forces_weight: 10.0
+      stress_weight: 100.0
+  optimizer_information:
+    optimizer: ADAM
+    batch_size: 8
+    ema_decay: 0.99
+    gradient_updates: 53287
+    learning_rate: 0.005
+    weight_decay: 0.0
+    gradient_clipping_tolerance: 10.0
+mace-GAP2020-FROM_SCRATCH_v5:
+  model_details:
+    channels: 16
+    max_L: 2
+    layers: 2
+    correlation_order: 3
+    spherical_harmonics_l: 3
+    radial_functions: 10
+    basis_functions: 5
+    radial_cutoff_A: 6.0
+    total_receptive_field_A: 12.0
+    hidden_irreps: 16x0e + 16x1o + 16x2e
+    total_parameters: 23328
+    radial_nn_architecture: FullyConnectedNet[10, 16, 16, 64]
+  loss_function:
+    type: WeightedEnergyForcesStressLoss
+    weights:
+      energy_weight: 1.0
+      forces_weight: 10.0
+      stress_weight: 100.0
+  optimizer_information:
+    optimizer: ADAM
+    batch_size: 8
+    ema_decay: 0.99
+    gradient_updates: 53287
+    learning_rate: 0.005
+    weight_decay: 0.0
+    gradient_clipping_tolerance: 10.0
+mace-GAP2020_FROM_SCRATCH_smaller:
+  model_details:
+    channels: 32
+    max_L: 1
+    layers: 2
+    correlation_order: 3
+    spherical_harmonics_l: 3
+    radial_functions: 10
+    basis_functions: 5
+    radial_cutoff_A: 6.0
+    total_receptive_field_A: 12.0
+    hidden_irreps: 32x0e + 32x1o
+    total_parameters: 39120
+    radial_nn_architecture: FullyConnectedNet[10, 16, 16, 128]
+  loss_function:
+    type: WeightedEnergyForcesStressLoss
+    weights:
+      energy_weight: 1.0
+      forces_weight: 1.0
+      stress_weight: 1.0
+  optimizer_information:
+    optimizer: ADAM
+    batch_size: 8
+    ema_decay: 0.99
+    gradient_updates: 53287
+    learning_rate: 0.005
+    weight_decay: 5.0e-07
+    gradient_clipping_tolerance: 10.0
+mace-GAP2020_FROM_SCRATCH_smaller2_l2:
+  model_details:
+    channels: 32
+    max_L: 1
+    layers: 2
+    correlation_order: 3
+    spherical_harmonics_l: 3
+    radial_functions: 10
+    basis_functions: 5
+    radial_cutoff_A: 6.0
+    total_receptive_field_A: 12.0
+    hidden_irreps: 32x0e + 32x1o
+    total_parameters: 34512
+    radial_nn_architecture: FullyConnectedNet[10, 16, 16, 128]
+  loss_function:
+    type: WeightedEnergyForcesStressLoss
+    weights:
+      energy_weight: 1.0
+      forces_weight: 1.0
+      stress_weight: 1.0
+  optimizer_information:
+    optimizer: ADAM
+    batch_size: 8
+    ema_decay: 0.99
+    gradient_updates: 53287
+    learning_rate: 0.005
+    weight_decay: 5.0e-07
+    gradient_clipping_tolerance: 10.0

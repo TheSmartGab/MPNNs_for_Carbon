@@ -1,0 +1,138 @@
+# ============================================================
+# Uniaxial tensile test of graphene using MACE (global virial)
+# ============================================================
+
+# ---------------- INITIALIZATION ----------------
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+# ---------------- ATOMS -------------------------
+read_data       2_layers_graphite.lammps-data
+
+mass            1 12.011
+labelmap        atom 1 C
+
+# ---------------- FORCE FIELD -------------------
+pair_style      mace no_domain_decomposition
+pair_coeff      1 1 ../MACE.model-lammps.pt C
+
+neighbor        2 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------------- SETTINGS ----------------------
+timestep        0.0005
+variable        ts equal 0.0005
+
+################################################
+# first, relax graphite cell
+group fully_constrained id 1
+fix cell_relax_contraints fully_constrained setforce 0 0 0
+fix cell_relax_box_relax all box/relax x 0 y 0 xy 0 couple xy nreset 10 fixedpoint 0 0 0
+
+thermo 1
+thermo_style custom lx ly lz pe press fmax
+dump cell_relax_dump all atom 1 "cell_relax.lammps-data"
+
+# compute upper atoms coordinates to access their relative position as initial guess of relative position for calculations in the loop
+
+reset_timestep  0
+minimize 0 1e-4 1000 10000
+unfix cell_relax_contraints
+unfix cell_relax_box_relax
+undump cell_relax_dump
+
+# compute displacement between upper 2 atoms, will be used in the loop as initial guess
+
+variable XDELTA equal $(x[4] - x[3])
+variable YDELTA equal $(y[4] - y[3])
+variable Z equal $(z[3])
+variable L equal $(lx)
+variable X2 equal $(x[2])
+variable Y2 equal $(y[2])
+variable Z2 equal $(z[2])
+
+# box vectors
+variable xlo equal xlo
+variable xhi equal xhi
+variable ylo equal ylo
+variable yhi equal yhi
+variable xy  equal xy   # box tilt
+
+variable a1x equal ${xhi}-${xlo}
+variable a1y equal 0
+variable a2x equal ${xy}
+variable a2y equal ${yhi}-${ylo}
+
+print "a1x a1y a2x a2y"
+print "${a1x} ${a1y} ${a2x} ${a2y}"
+
+# ==============================================
+# constraints for atom position minimization
+
+# groups
+# constrain the first atom still
+group xy_constrained id 3
+group fully_relax id 2 4
+
+# impose the actual constraints using setforce, NULL does not alter force in that component
+group fully_constrained id 1
+fix fix_fully_constrained fully_constrained setforce 0 0 0
+fix fix_xy_constrained xy_constrained setforce 0 0 NULL
+
+# how many points to sample
+variable N1 equal 15
+variable N2 equal 15
+
+variable resultsfile string "graphene_potential.out"
+
+thermo 1
+thermo_style custom lx ly lz pe press fmax
+
+variable i1 loop ${N1}
+label loop1_start
+    variable i2 loop ${N2}
+    label loop2_start
+
+        # fractional coordinates 0 -> 1
+        variable u equal (${i1}-1)/(${N1})
+        variable v equal (${i2}-1)/(${N2})
+
+        # convert to Cartesian using box vectors
+        variable X3 equal ${u}*${a1x} + ${v}*${a2x}
+        variable Y3 equal ${u}*${a1y} + ${v}*${a2y}
+        variable X4 equal ${X3} + ${XDELTA}
+        variable Y4 equal ${Y3} + ${YDELTA}
+
+        print "====================================="
+        print "new variables"
+        print "${X3} ${Y3}"
+        print "====================================="
+
+        set atom 3 x ${X3} y ${Y3} z ${Z}
+        set atom 4 x ${X4} y ${Y4} z ${Z}
+        set atom 2 x ${X2} y ${Y2} z ${Z2}
+
+        # dump & minimize
+        variable dumpfile string graphite_relaxations/atom_relax_${i1}_${i2}.lammps-data
+        dump atom_relax_dump all atom 1 ${dumpfile}
+        reset_timestep 0
+        minimize 0 1e-8 100 1000
+        undump atom_relax_dump
+
+        # write results
+        variable x3 equal x[3]
+        variable y3 equal y[3]
+        variable z3 equal z[3]
+        variable ep equal pe
+        print "${X3} ${Y3} ${z3} ${ep}" append ${resultsfile}
+
+    next i2
+    jump SELF loop2_start
+next i1
+jump SELF loop1_start
+
+print "All done"

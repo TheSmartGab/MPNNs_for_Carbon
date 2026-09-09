@@ -1,0 +1,8 @@
+400K/THERMALIZATION/thermalized_400K.lammps-data
+500K/THERMALIZATION/thermalized_500K.lammps-data
+600K/THERMALIZATION/thermalized_600K.lammps-data
+700K/THERMALIZATION/thermalized_700K.lammps-data
+800K/THERMALIZATION/thermalized_800K.lammps-data
+900K/THERMALIZATION/thermalized_900K.lammps-data
+1000K/THERMALIZATION/thermalized_1000K.lammps-data
+1100K/THERMALIZATION/thermalized_1100K.lammps-data

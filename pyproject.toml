@@ -1,0 +1,44 @@
+[project]
+name = "thesisproject"
+version = "0.1.0"
+description = "Thesis research utilities for computational materials science and machine learning interatomic potentials"
+requires-python = ">=3.9"
+
+# Core dependencies for atomic simulations, ML potentials, data processing, and visualization
+dependencies = [
+    "numpy",           # Numerical computing and array operations
+    "scipy",           # Scientific computing (statistics, optimization, special functions)
+    "ase",             # Atomic Simulation Environment for atomic structures and DFT/MLP workflows
+    "matplotlib",      # Data visualization and plotting
+    "pandas",          # Data manipulation and CSV parsing
+    "lammps_logfile",  # Parsing LAMMPS simulation log files
+    "emcee",           # MCMC sampling for Bayesian inference of reaction rates
+    "numba",           # JIT compilation for performance-critical numerical code
+    "tqdm",            # Progress bars for long-running computations
+    "seaborn",         # Statistical data visualization
+    "argcomplete",     # Command-line argument auto-completion
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.31.0",  # Jupyter kernel for interactive development and notebook support
+]
+
+# Optional dependencies for GPU acceleration (CUDA/MPS) with ML potentials:
+# - MACE/NequIP models require PyTorch with CUDA support for GPU computation
+# - Install via: pip install torch --index-url https://download.pytorch.org/whl/cu121
+optional-dependencies = {gpu = [
+    "torch",
+]}
+
+[project.scripts]
+diff_distributions = "compare_outputs.diff_distributions:main"
+dump2traj = "structure.dump2traj:main"
+compare_rates = "structure.compare_rates:main"
+mace_compare_sizes = "mace.metrics.metrics_vs_size:main"

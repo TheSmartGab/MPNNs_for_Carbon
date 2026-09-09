@@ -1,0 +1,74 @@
+# ============================================================
+# Uniaxial tensile test of graphene using MACE (global virial)
+# ============================================================
+
+# ---------------- INITIALIZATION ----------------
+units           metal
+dimension       3
+boundary        p p f
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+# ---------------- ATOMS -------------------------
+lattice none 1.0
+region dummy block 0 10 0 10 0 10 units box
+create_box 1 dummy  # 1 atom type is fine, just to define box
+
+# 2. Read only the last frame of the dump
+read_dump "Thermalize/thermalization_graphene_3_2.lammpstrj" 1000 x y z vx vy vz box yes add yes
+reset_timestep 0
+
+
+mass            1 12.011
+labelmap        atom 1 C
+
+# ---------------- FORCE FIELD -------------------
+pair_style      mace no_domain_decomposition
+pair_coeff      1 1 ../../MACE.model-lammps.pt C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------------- TIME SETTINGS ----------------------
+# timestep
+timestep        0.001
+variable        ts equal 0.001
+# equilibration
+variable        tdamp equal 100*${ts} # damping coefficient
+variable        seq equal 1000 # steps for equilibration
+
+# ---------------- GLOBAL STRESS and ATOMIC VIRIALS ----------
+compute         p all pressure thermo_temp
+compute         virials all stress/atom NULL 
+compute         virial all reduce sum c_virials[1] c_virials[2] c_virials[3] c_virials[4] c_virials[5] c_virials[6]
+
+
+# ---------------- GEOMETRY VARIABLES -------------
+variable        Lx equal lx
+variable        Ly equal ly
+variable        Lz equal lz
+variable        Vol equal vol
+
+# ---------------- Thermalization ---------------------
+reset_timestep  0
+velocity all create 300.0 1009 mom yes rot yes dist gaussian
+run 0
+velocity all scale 300.0
+
+fix dyn         all nve
+
+fix thermostat	all langevin &
+			300 300 ${tdamp} 1009
+#fix barostat    all press/berendsen &
+#			x 1 1 ${tdamp} &
+#			y 1 1 ${tdamp} &
+		     
+
+thermo          1
+thermo_style custom step temp pe ke etotal lx ly press &
+    c_virial[1] c_virial[2] c_virial[3] &
+    c_virial[4] c_virial[5] c_virial[6]
+
+dump            dump_thermo all custom 100 StrainStress/graphene_3_2.lammpstrj id type x y z vx vy vz fx fy fz  c_virials[1] c_virials[2] c_virials[3] c_virials[4] c_virials[5] c_virials[6]
+run             ${seq}

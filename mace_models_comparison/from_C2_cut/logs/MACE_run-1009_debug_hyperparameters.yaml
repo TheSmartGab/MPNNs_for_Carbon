@@ -1,0 +1,21 @@
+model_details:
+  layers: 2
+  correlation_order: 3
+  spherical_harmonics_l: 3
+  radial_cutoff_A: 6.0
+  total_receptive_field_A: 12.0
+  total_parameters: 355098
+loss_function:
+  type: WeightedEnergyForcesStressLoss
+  weights:
+    energy_weight: 1.0
+    forces_weight: 1.0
+    stress_weight: 1.0
+optimizer_information:
+  optimizer: ADAM
+  batch_size: 8
+  ema_decay: 0.99
+  gradient_updates: 51800
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clipping_tolerance: 10.0

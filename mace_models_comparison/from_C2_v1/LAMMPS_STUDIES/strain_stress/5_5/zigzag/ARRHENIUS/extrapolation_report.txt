@@ -1,0 +1,14 @@
+==================================================
+ENERGY BARRIER STRAIN EXTRAPOLATION REPORT
+==================================================
+
+Linear Model: Delta E = A * strain + B
+
+Slope (A):      -1.105326e+01 ± 9.476476e-01 eV
+Intercept (B):  +2.455686e+00 ± 1.960205e-01 eV
+Covariance(AB): -1.857467e-01
+
+--------------------------------------------------
+Extrapolated X-Intercept (Delta E = 0):
+Critical Strain (epsilon_0): 0.222168 ± 0.001329
+--------------------------------------------------

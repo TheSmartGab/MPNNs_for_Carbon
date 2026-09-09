@@ -1,0 +1,40 @@
+python -m mace.cli.run_train \
+  --name="MACE" \
+  --atomic_numbers="[6]" \
+  --train_file="../../../../../DATASETS/C/GAP2020/config_types/Dimer_train.extxyz" \
+  --valid_file="../../../../../DATASETS/C/GAP2020/config_types/Dimer_val.extxyz" \
+  --compute_stress=True \
+  --energy_weight=1.0 \
+  --forces_weight=1.0 \
+  --stress_weight=1.0 \
+  --E0s="{6: 1.02433787}"\
+  --lr=0.01 \
+  --scaling="rms_forces_scaling" \
+  --batch_size=4 \
+  --valid_batch_size=8 \
+  --num_workers=2 \
+  --max_num_epochs=200 \
+  --ema \
+  --ema_decay=0.99 \
+  --amsgrad \
+  --scheduler="ReduceLROnPlateau" \
+  --lr_factor=0.5 \
+  --scheduler_patience=10 \
+  --patience=50 \
+  --clip_grad=10 \
+  --default_dtype="float32" \
+  --device=cpu \
+  --seed=1009 \
+  --energy_key="energy" \
+  --forces_key="forces" \
+  --stress_key="stress" \
+  --pair_repulsion \
+  --loss='stress' \
+  --num_interactions=2 \
+  --radial_MLP="[16, 16]" \
+  --num_radial_basis=10 \
+  --r_max=6 \
+  --num_channels=32 \
+  --edge_irreps="16x0e + 16x1o + 16x2e + 16x3o" \
+  --hidden_irreps="32x0e + 32x1o" \
+  --correlation=3

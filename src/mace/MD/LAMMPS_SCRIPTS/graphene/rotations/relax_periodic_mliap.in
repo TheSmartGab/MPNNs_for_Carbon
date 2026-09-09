@@ -1,0 +1,94 @@
+# Relax periodix system of bylayer graphene
+# One layer cannot rotate on the other, since it would break really strong bonds
+
+variable INPUT_CONFIG index "in.dat"
+variable MODEL index "model.model"
+variable DUMP index "dump.dump"
+variable OUT_FILE index "relaxed.lammps-data"
+
+variable timestep index 0.001 # timestep
+
+variable NDUMP index 1000
+variable NTHERMO index 100
+
+units           metal
+dimension       3
+boundary        p p f
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+print "==========================================="
+print "READING DATA"
+read_data       ${INPUT_CONFIG}
+print "==========================================="
+
+mass            1 12.011
+
+print "==========================================="
+print "READING MODEL"
+pair_style      mliap unified ${MODEL} 0
+pair_coeff      * * C
+print "==========================================="
+
+neighbor        0.2 bin
+neigh_modify    delay 0 every 1 check yes
+
+timestep        ${timestep}
+
+thermo          ${NTHERMO}
+thermo_style    custom step pe ke etotal fmax
+
+dump        relax_dump all custom ${NDUMP} ${DUMP} id type x y z vx vy vz fx fy fz 
+
+#######################
+# parameters 
+
+# lower and upper layer
+variable zminlow equal 49
+variable zmaxlow equal 51
+variable zminhigh equal 52
+variable zmaxhigh equal 54
+
+region lowerreg block INF INF INF INF ${zminlow} ${zminhigh}
+region upperreg block INF INF INF INF ${zminhigh} ${zmaxhigh}
+
+group lowergr region lowerreg
+group uppergr region upperreg 
+
+# create a per-atom property for ID
+compute id_lower_prop lowergr property/atom id
+compute id_upper_prop uppergr property/atom id
+
+#  reduce to find the minimum ID in each group
+compute minID_lower lowergr reduce min c_id_lower_prop
+compute minID_upper uppergr reduce min c_id_upper_prop
+
+# assign the minimum IDs to variables
+variable id_lower equal c_minID_lower
+variable id_upper equal c_minID_upper
+
+run 0
+
+group lowerfixed id ${id_lower}
+group upperfixed id ${id_upper} 
+
+#  pin (fixforce) the atoms with the minimum ID in each group
+fix fixlower lowerfixed setforce 0 0 0
+fix fixupper upperfixed setforce 0 0 0
+
+print "==========================================="
+print "RELAXATION START"
+
+#fix cell_relax_box_relax all box/relax x 0 y 0 xy 0 couple xy nreset 10 fixedpoint 0 0 0 # can be used only for triclinic
+#fix cell_relax_box_relax all box/relax x 0 y 0 nreset 10 fixedpoint 0 0 0
+
+# minimize with fire 
+min_style fire
+minimize 1e-8 1e-4 10000 100000
+
+undump relax_dump
+print "==========================================="
+
+write_data ${OUT_FILE}
+print           "Relaxation Done"

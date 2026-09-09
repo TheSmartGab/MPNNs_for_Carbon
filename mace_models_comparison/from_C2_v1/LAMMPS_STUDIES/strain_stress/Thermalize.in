@@ -1,0 +1,75 @@
+# ============================================================
+# Uniaxial tensile test of graphene using MACE (global virial)
+# ============================================================
+
+# ---------------- INITIALIZATION ----------------
+units           metal
+dimension       3
+boundary        p p f
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+# ---------------- ATOMS -------------------------
+read_data       initial_graphene_21_12.lammps-data
+
+mass            1 12.011
+labelmap        atom 1 C
+
+# ---------------- FORCE FIELD -------------------
+pair_style      mace no_domain_decomposition
+pair_coeff      1 1 ../../MACE.model-lammps.pt C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------------- TIME SETTINGS ----------------------
+# timestep
+timestep        0.001
+variable        ts equal 0.001
+# equilibration
+variable        tdamp equal 100*${ts} # damping coefficient
+variable        seq equal 1000 # steps for equilibration
+
+# ---------------- GLOBAL STRESS (atomic virials not available) ----------
+compute         p all pressure thermo_temp
+
+# ---------------- GEOMETRY VARIABLES -------------
+variable        Lx equal lx
+variable        Ly equal ly
+variable        Lz equal lz
+variable        Vol equal vol
+
+# Relax the system
+# relax box and atoms at wanted stress
+fix box_relax all box/relax &
+	x 0 y 0 nreset 10 &
+	fixedpoint 0 0 0
+dump	relax_dump all custom 100 Thermalize/relax_graphene_21_12.lammpstrj id type x y z vx vy vz fx fy fz
+
+thermo_style custom step temp pe ke etotal lx ly press
+
+minimize 1e-4 1e-6 100 1000
+unfix box_relax
+undump relax_dump
+
+# ---------------- Thermalization ---------------------
+reset_timestep  0
+velocity all create 300.0 1009 mom yes rot yes dist gaussian
+run 0
+velocity all scale 300.0
+
+fix dyn         all nve
+
+fix thermostat	all langevin &
+			300 300 ${tdamp} 1009
+#fix barostat    all press/berendsen &
+#			x 1 1 ${tdamp} &
+#			y 1 1 ${tdamp} &
+		     
+
+thermo          1
+thermo_style    custom step temp pe ke etotal lx ly press
+
+dump            dump_thermo all custom 100 Thermalize/thermalization_graphene_21_12.lammpstrj id type x y z vx vy vz fx fy fz
+run             ${seq}

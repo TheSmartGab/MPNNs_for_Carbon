@@ -1,0 +1,5 @@
+Minimum Potential Energy: -19.900048 eV
+Distance at Minimum Energy: 3.090000 Å
+Asymptotic Energy: -19.838249 eV
+Distance at which Energy Saturates: 5.000000 Å
+Binding Energy: 0.061799 eV

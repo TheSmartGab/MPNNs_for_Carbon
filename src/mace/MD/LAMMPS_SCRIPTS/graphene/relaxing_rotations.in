@@ -1,0 +1,85 @@
+# ============================================================
+# GRAPHENE INTERLAYER DISTANCE SCAN - CLEANED VERSION
+# ============================================================
+
+# ---------- User variables ----------
+variable INPUT_CONFIG index "/home/gabri/Thesis/PROJECT/src/mace/MD/LAMMPS_SCRIPTS/graphene/circular_graphite_top_pair_connected.lammps-data"
+variable MODEL        index "model.model"
+variable DUMP_DIR     index "DUMP"
+variable ENERGY_FILE  index "relaxing_graphene_rotation_scan.out"
+
+variable thetamin   equal 0.0
+variable thetamax   equal 60
+variable dtheta     equal 1.0
+variable nsteps     equal (${thetamax} - ${thetamin})/${dtheta}
+
+# ---------- Initial system setup ----------
+clear
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+atom_modify     map yes
+newton          on
+
+read_data       ${INPUT_CONFIG}
+
+mass            1 12.011
+# labelmap        atom 1 C
+
+pair_style      mliap unified ${MODEL} 0
+pair_coeff      * * C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------- Output header ----------
+print "# RotationAngle   Potential_energy(eV)" file ${ENERGY_FILE}
+
+thermo 1
+thermo_style custom step pe fmax press
+
+# upper and lower
+region reg_lower block INF INF INF INF -1 1
+region reg_upper block INF INF INF INF 2 4
+
+group lower region reg_lower
+group upper region reg_upper
+
+variable angle equal 0
+
+# fix xy forces to 0 during all minimizations
+fix xyconstraint all setforce 0 0 NULL
+
+min_style cg
+
+dump minimize_dump all custom 1 ${DUMP_DIR}/relaxing_0.lammps-data id type x y z fx fy fz
+minimize 0 2e-3 1000 10000
+undump minimize_dump
+
+variable pe equal pe
+print "${angle} ${pe}" append ${ENERGY_FILE}
+
+# ============================================================
+# Theta scan loop
+# ============================================================
+variable i loop ${nsteps}
+label loop_start
+
+    reset_timestep 0
+
+    # Move upper layer to target z
+    displace_atoms upper rotate 0.0 0.0 0.0 0.0 0.0 1.0 ${dtheta} units box
+    variable angle equal ${angle} + ${dtheta}
+
+    # DUMP
+    dump minimize_dump all custom 1 ${DUMP_DIR}/relaxing_${i}.lammps-data id type x y z fx fy fz
+    minimize 0 2e-3 1000 10000
+    undump minimize_dump
+
+    print "${angle} ${pe}" append ${ENERGY_FILE}
+
+next i
+jump SELF loop_start
+
+print "Distance scan complete"

@@ -1,0 +1,4 @@
+sshpass -f pass rsync -avz --progress marconi:/home/gabrielecolombo/Thesis/PROJECT/from_C2_v1/TESTING_LAMMPS/strain_stress/5_5/zigzag/350K .
+sshpass -f pass rsync -avz --progress marconi:/home/gabrielecolombo/Thesis/PROJECT/from_C2_v1/TESTING_LAMMPS/strain_stress/5_5/zigzag/400 .
+sshpass -f pass rsync -avz --progress marconi:/home/gabrielecolombo/Thesis/PROJECT/from_C2_v1/TESTING_LAMMPS/strain_stress/5_5/zigzag/450K .
+sshpass -f pass rsync -avz --progress marconi:/home/gabrielecolombo/Thesis/PROJECT/from_C2_v1/TESTING_LAMMPS/strain_stress/5_5/zigzag/500K .

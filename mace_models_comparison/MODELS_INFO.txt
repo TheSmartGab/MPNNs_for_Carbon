@@ -1,0 +1,291 @@
+Fine tuning is not working, E0s are wrong, although I specify them from cli (either as --E0s: of heads:{Default:{E0s: file/to/E0s.json}})
+the november article suggest that fine tuning should improve performance
+
+
+from_C2_v1
+python -m mace.cli.run_train \
+  --name="MACE" \
+  --atomic_numbers="[6]" \
+  --train_file="../../../../../DATASETS/C/GAP2020/config_types/PERIODIC_Dimer.extxyz" \
+  --valid_fraction=0.10 \
+  --compute_stress=True \
+  --energy_weight=1.0 \
+  --forces_weight=1.0 \
+  --stress_weight=1.0 \
+  --E0s="{6: 1.02433787}"\
+  --lr=0.01 \
+  --scaling="rms_forces_scaling" \
+  --batch_size=4 \
+  --valid_batch_size=8 \
+  --num_workers=2 \
+  --max_num_epochs=200 \
+  --ema \
+  --ema_decay=0.99 \
+  --amsgrad \
+  --scheduler="ReduceLROnPlateau" \
+  --lr_factor=0.5 \
+  --scheduler_patience=10 \
+  --patience=50 \
+  --clip_grad=10 \
+  --default_dtype="float32" \
+  --device=cpu \
+  --seed=1009 \
+  --energy_key="energy" \
+  --forces_key="forces" \
+  --stress_key="stress" \
+  --pair_repulsion \
+  --loss='stress' \
+  --num_interactions=2 \
+  --radial_MLP="[64,64,64]" \
+  --num_radial_basis=10 \
+  --r_max=6 \
+  --num_channels=128 \
+  --edge_irreps="16x0e + 16x1o + 16x2e + 16x3o" \
+  --hidden_irreps="128x0e + 128x1o" \
+  --correlation=3
+
+FROM_SCRATCH_v3
+!python -m mace.cli.run_train \
+  --name="MACE" \
+  --atomic_numbers="[6]" \
+  --train_file="/kaggle/input/periodic-gap2020/TRAIN.extxyz" \
+  --valid_file="/kaggle/input/periodic-gap2020/VAL.extxyz" \
+  --compute_stress=True \
+  --energy_weight=1.0 \
+  --forces_weight=10.0 \
+  --stress_weight=100.0 \
+  --E0s="{6: 1.02433787}"\
+  --lr=0.005 \
+  --scaling="rms_forces_scaling" \
+  --batch_size=8 \
+  --valid_batch_size=8 \
+  --num_workers=2 \
+  --max_num_epochs=100 \
+  --swa \
+  --start_swa 80 \
+  --swa_lr 0.001 \
+  --swa_forces_weight 100 \
+  --swa_energy_weight 1000 \
+  --swa_stress_weight 10 \
+  --ema \
+  --ema_decay=0.99 \
+  --amsgrad \
+  --scheduler="ReduceLROnPlateau" \
+  --lr_factor=0.8 \
+  --scheduler_patience=5 \
+  --patience=25 \
+  --clip_grad=10 \
+  --default_dtype="float32" \
+  --device=cuda \
+  --enable_cueq=True \
+  --distributed \
+  --seed=1009 \
+  --energy_key="energy" \
+  --forces_key="forces" \
+  --stress_key="stress" \
+  --pair_repulsion \
+  --loss='stress' \
+  --num_interactions=2 \
+  --radial_MLP="[32, 32]" \
+  --num_radial_basis=10 \
+  --r_max=6 \
+  --num_channels=32 \
+  --edge_irreps="16x0e + 16x1o + 16x2e" \
+  --hidden_irreps="128x0e + 128x1o" \
+  --correlation=3 \
+  --weight_decay=0
+
+
+FROM_SCRATCH_v4
+python -m mace.cli.run_train \
+  --name="MACE" \
+  --atomic_numbers="[6]" \
+  --train_file="/kaggle/input/periodic-gap2020/TRAIN.extxyz" \
+  --valid_file="/kaggle/input/periodic-gap2020/VAL.extxyz" \
+  --compute_stress=True \
+  --energy_weight=1.0 \
+  --forces_weight=10.0 \
+  --stress_weight=100.0 \
+  --E0s="{6: 1.02433787}"\
+  --lr=0.005 \
+  --scaling="rms_forces_scaling" \
+  --batch_size=8 \
+  --valid_batch_size=8 \
+  --num_workers=2 \
+  --max_num_epochs=100 \
+  --swa \
+  --start_swa 80 \
+  --swa_lr 0.001 \
+  --swa_forces_weight 100 \
+  --swa_energy_weight 1000 \
+  --swa_stress_weight 10 \
+  --ema \
+  --ema_decay=0.99 \
+  --amsgrad \
+  --scheduler="ReduceLROnPlateau" \
+  --lr_factor=0.8 \
+  --scheduler_patience=5 \
+  --patience=25 \
+  --clip_grad=10 \
+  --default_dtype="float32" \
+  --device=cuda \
+  --enable_cueq=True \
+  --distributed \
+  --seed=1009 \
+  --energy_key="energy" \
+  --forces_key="forces" \
+  --stress_key="stress" \
+  --pair_repulsion \
+  --loss='stress' \
+  --num_interactions=2 \
+  --radial_MLP="[16, 16]" \
+  --num_radial_basis=10 \
+  --r_max=6 \
+  --num_channels=32 \
+  --edge_irreps="16x0e + 16x1o + 16x2e + 16x3o" \
+  --hidden_irreps="64x0e + 64x1o" \
+  --correlation=3 \
+  --weight_decay=0
+
+
+FROM_SCRATCH_v5
+a giudicare dal log, le irreps di edge hanno armoniche sferiche fino a l=3 potrebbe essere un bug di mace 
+il bug è solo nel log, il modello ha davvero edge irreps fino a l=4
+
+python -m mace.cli.run_train \
+  --name="MACE" \
+  --atomic_numbers="[6]" \
+  --train_file="/kaggle/input/periodic-gap2020/TRAIN.extxyz" \
+  --valid_file="/kaggle/input/periodic-gap2020/VAL.extxyz" \
+  --compute_stress=True \
+  --energy_weight=1.0 \
+  --forces_weight=10.0 \
+  --stress_weight=100.0 \
+  --E0s="{6: 1.02433787}"\
+  --lr=0.005 \
+  --scaling="rms_forces_scaling" \
+  --batch_size=8 \
+  --valid_batch_size=8 \
+  --num_workers=2 \
+  --max_num_epochs=100 \
+  --swa \
+  --start_swa 80 \
+  --swa_lr 0.001 \
+  --swa_forces_weight 100 \
+  --swa_energy_weight 1000 \
+  --swa_stress_weight 10 \
+  --ema \
+  --ema_decay=0.99 \
+  --amsgrad \
+  --scheduler="ReduceLROnPlateau" \
+  --lr_factor=0.8 \
+  --scheduler_patience=5 \
+  --patience=25 \
+  --clip_grad=10 \
+  --default_dtype="float32" \
+  --device=cuda \
+  --enable_cueq=True \
+  --distributed \
+  --seed=1009 \
+  --energy_key="energy" \
+  --forces_key="forces" \
+  --stress_key="stress" \
+  --pair_repulsion \
+  --loss='stress' \
+  --num_interactions=2 \
+  --radial_MLP="[16, 16]" \
+  --num_radial_basis=10 \
+  --r_max=6 \
+  --num_channels=16 \
+  --edge_irreps="16x0e + 16x1o + 16x2e + 16x3o + 16x4e" \
+  --hidden_irreps="16x0e + 16x1o + 16x2e" \
+  --correlation=3 \
+  --weight_decay=0
+
+SMALLER
+!python -m mace.cli.run_train \
+  --name="MACE" \
+  --atomic_numbers="[6]" \
+  --train_file="/kaggle/input/periodic-gap2020/TRAIN.extxyz" \
+  --valid_file="/kaggle/input/periodic-gap2020/VAL.extxyz" \
+  --compute_stress=True \
+  --energy_weight=1.0 \
+  --forces_weight=1.0 \
+  --stress_weight=1.0 \
+  --E0s="{6: 1.02433787}"\
+  --lr=0.005 \
+  --scaling="rms_forces_scaling" \
+  --batch_size=8 \
+  --valid_batch_size=8 \
+  --num_workers=2 \
+  --max_num_epochs=100 \
+  --ema \
+  --ema_decay=0.99 \
+  --amsgrad \
+  --scheduler="ReduceLROnPlateau" \
+  --lr_factor=0.8 \
+  --scheduler_patience=5 \
+  --patience=25 \
+  --clip_grad=10 \
+  --default_dtype="float32" \
+  --device=cuda \
+  --enable_cueq=True \
+  --distributed \
+  --seed=1009 \
+  --energy_key="energy" \
+  --forces_key="forces" \
+  --stress_key="stress" \
+  --pair_repulsion \
+  --loss='stress' \
+  --num_interactions=2 \
+  --radial_MLP="[16, 16]" \
+  --num_radial_basis=10 \
+  --r_max=6 \
+  --num_channels=32 \
+  --edge_irreps="16x0e + 16x1o + 16x2e + 16x3o" \
+  --hidden_irreps="32x0e + 32x1o" \
+  --correlation=3
+
+SMALLER2_l2
+!python -m mace.cli.run_train \
+  --name="MACE" \
+  --atomic_numbers="[6]" \
+  --train_file="/kaggle/input/periodic-gap2020/TRAIN.extxyz" \
+  --valid_file="/kaggle/input/periodic-gap2020/VAL.extxyz" \
+  --compute_stress=True \
+  --energy_weight=1.0 \
+  --forces_weight=1.0 \
+  --stress_weight=1.0 \
+  --E0s="{6: 1.02433787}"\
+  --lr=0.005 \
+  --scaling="rms_forces_scaling" \
+  --batch_size=8 \
+  --valid_batch_size=8 \
+  --num_workers=2 \
+  --max_num_epochs=100 \
+  --ema \
+  --ema_decay=0.99 \
+  --amsgrad \
+  --scheduler="ReduceLROnPlateau" \
+  --lr_factor=0.8 \
+  --scheduler_patience=5 \
+  --patience=25 \
+  --clip_grad=10 \
+  --default_dtype="float32" \
+  --device=cuda \
+  --enable_cueq=True \
+  --distributed \
+  --seed=1009 \
+  --energy_key="energy" \
+  --forces_key="forces" \
+  --stress_key="stress" \
+  --pair_repulsion \
+  --loss='stress' \
+  --num_interactions=2 \
+  --radial_MLP="[16, 16]" \
+  --num_radial_basis=10 \
+  --r_max=6 \
+  --num_channels=32 \
+  --edge_irreps="16x0e + 16x1o + 16x2e" \
+  --hidden_irreps="32x0e + 32x1o" \
+  --correlation=3

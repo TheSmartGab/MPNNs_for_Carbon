@@ -1,0 +1,236 @@
+# ============================================================
+# General strain tensor control (Voigt notation)
+# NVE + Langevin
+# ============================================================
+# this script was originally written to restart a strain stress simulation
+# it became usefull to run run independent simulations near the breaking point to study breaking rate
+
+# additional information to tell the script where it left
+variable current_exx index 0.0
+variable current_eyy index 0.0
+variable current_ezz index 0.0
+variable current_gyz index 0.0
+variable current_gxz index 0.0
+variable current_gxy index 0.0
+
+variable current_strain index 0 # what strain inex you are currently on
+variable current_step index 0 # what step you are currently on in the current strain
+
+# what you originally wanted to do 
+# so, if you wanted 25 strains with 10000 steps, left on step 7350 of strain 20, pass -var NSTRAINS 25 -var nsteps 10000
+# the script will compute the initial lenghts, run the missing steps at current strain, an then carry out the rest of the symulation
+# note that strain is 1 indexed, so if you are on the 7th strain, pass -var current_strain 7 
+# the global step is 0 indexed, but this is managed inside
+# current step should be the current step in current strain
+# you may see something like 197245 if doing 10000 steps per strain with simulation crashed at the 20th strain. in such case, pass 7245 (basically, step%nsteps)
+
+# ---------------- DEFAULT STRAIN COMPONENTS ----------------
+# (All zero unless overridden from command line)
+
+variable max_exx index 0.0
+variable max_eyy index 0.0
+variable max_ezz index 0.0
+variable max_gyz index 0.0
+variable max_gxz index 0.0
+variable max_gxy index 0.0
+
+# ---------------- OTHER USER VARIABLES ----------------
+
+variable MODEL          index ../../MACE.model-lammps.pt
+variable INPUT_CONFIG   index input.lammps-data
+
+variable TEMP           index 300.0
+variable SEED           index 1009 # can make simulations independent by changing this. 
+
+variable NSTRAINS       index 25
+variable timestep       index 0.001
+variable tdamp          index 1.0 
+variable nsteps         index 10000
+
+variable missing_steps equal ${nsteps} - ${current_step} -1 # the -1 is due to the fact that lammps is 0 indexed
+variable global_step equal (${current_strain}-1)*${nsteps} + ${current_step} +1  # this is the global step to be done.
+
+# DUMP
+variable DUMPFILE index restart_strain_stress.lammpstrj
+
+# ---------------- INITIALIZATION ----------------
+
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+read_data       ${INPUT_CONFIG}
+
+mass            1 12.011
+labelmap        atom 1 C
+
+pair_style      mace no_domain_decomposition
+pair_coeff      * * ${MODEL} C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        ${timestep}
+
+# ---------------- INITIAL GEOMETRY --------------
+
+print "INITIALIZING GEOMETRY VARIABLES"
+run 0
+
+# Convert to triclinic so shear components are allowed
+print "CHANGE BOX TRICLINIC"
+change_box all triclinic
+
+#Define tracking variables (dynamic)
+variable lx equal lx
+variable ly equal ly
+variable lz equal lz
+
+variable xy equal xy
+variable xz equal xz
+variable yz equal yz
+
+#Freeze the initial box as constants AFTER defining dynamic variables
+variable l0x equal ${lx} / (1+${current_exx})
+variable l0y index ${ly} / (1+${current_eyy})
+variable l0z index ${lz} / (1+${current_ezz})
+
+variable xy0 index ${xy} / (1+${current_gxy})
+variable xz0 index ${xz} / (1+${current_gxz})
+variable yz0 index ${yz} / (1+${current_gyz})
+
+
+# ---------------- COMPUTES ----------------
+
+print "DEFINING COMPUTES"
+compute temp_compute  all temp
+compute press_compute all pressure temp_compute
+
+# ---------------- DUMP ----------------
+
+print "DEFINING DUMP"
+dump mydump all custom 1 ${DUMPFILE} id element x y z vx vy vz fx fy fz 
+
+# ---------------- INTEGRATION ----------------
+
+print "DEFINING TIME INTEGRATION AND THERMOSTAT"
+fix integrator all nve
+fix thermostat all langevin ${TEMP} ${TEMP} ${tdamp} ${SEED} zero yes
+
+# ---------------- STRAIN LOOP ----------------
+
+# first finish steps
+print "FINISHING STEPS AT CURRENT STRAIN"
+# Increment fraction
+# copied syntax from the loop to ensure same logic is applied
+
+variable f equal ${current_strain}/${NSTRAINS}
+
+# Target normal strains (FIXED SYNTAX)
+variable exx equal ${f}*${max_exx}
+variable eyy equal ${f}*${max_eyy}
+variable ezz equal ${f}*${max_ezz}
+
+# Target shear strains 
+variable gyz equal ${f}*${max_gyz}
+variable gxz equal ${f}*${max_gxz}
+variable gxy equal ${f}*${max_gxy}
+
+# Updated box lengths (relative to INITIAL box)
+variable new_lx equal ${l0x}*(1.0 + ${exx})
+variable new_ly equal ${l0y}*(1.0 + ${eyy})
+variable new_lz equal ${l0z}*(1.0 + ${ezz})
+
+# Updated tilt factors (include initial tilt)
+variable new_xy equal ${xy0} + ${l0y}*${gxy}
+variable new_xz equal ${xz0} + ${l0z}*${gxz}
+variable new_yz equal ${yz0} + ${l0z}*${gyz}
+
+# DO NOT CHANGE THE BOX
+# I fear that, although logically correct, numerical instabilities may have a role in slightly changing box value
+# Apply full strain tensor relative to initial state
+#change_box all & 
+#    x final 0.0 ${new_lx} & 
+#    y final 0.0 ${new_ly} & 
+#    z final 0.0 ${new_lz} & 
+#    xy final ${new_xy} & 
+#    xz final ${new_xz} & 
+#    yz final ${new_yz} & 
+#    remap units box
+
+
+# ---------------- THERMO ----------------
+
+print "DEFINING THERMO"
+thermo 1
+
+thermo_style custom step temp &
+lx ly lz xy xz yz &
+v_exx v_eyy v_ezz v_gxy v_gxz v_gyz &
+c_press_compute[1] c_press_compute[2] c_press_compute[3] &
+c_press_compute[4] c_press_compute[5] c_press_compute[6]
+
+print ${global_step}
+reset_timestep ${global_step} # this way output will attach nicely to previous one
+run ${missing_steps}
+
+print "STRAIN LOOP START"
+
+variable strain_index equal ${current_strain} + 1
+variable i loop ${strain_index} ${NSTRAINS}
+label STRAIN_LOOP
+
+    # Increment fraction
+    variable f equal ${i}/${NSTRAINS}
+
+    # Target normal strains (FIXED SYNTAX)
+    variable exx equal ${f}*${max_exx}
+    variable eyy equal ${f}*${max_eyy}
+    variable ezz equal ${f}*${max_ezz}
+
+    # Target shear strains 
+    variable gyz equal ${f}*${max_gyz}
+    variable gxz equal ${f}*${max_gxz}
+    variable gxy equal ${f}*${max_gxy}
+
+    # Updated box lengths (relative to INITIAL box)
+    variable new_lx equal ${l0x}*(1.0 + ${exx})
+    variable new_ly equal ${l0y}*(1.0 + ${eyy})
+    variable new_lz equal ${l0z}*(1.0 + ${ezz})
+
+    # Updated tilt factors (include initial tilt)
+    variable new_xy equal ${xy0} + ${l0y}*${gxy}
+    variable new_xz equal ${xz0} + ${l0z}*${gxz}
+    variable new_yz equal ${yz0} + ${l0z}*${gyz}
+
+    # Apply full strain tensor relative to initial state
+    change_box all & 
+        x final 0.0 ${new_lx} & 
+        y final 0.0 ${new_ly} & 
+        z final 0.0 ${new_lz} & 
+        xy final ${new_xy} & 
+        xz final ${new_xz} & 
+        yz final ${new_yz} & 
+        remap units box
+
+
+    # ---------------- THERMO ----------------
+
+    print "DEFINING THERMO"
+    thermo 1
+
+    thermo_style custom step temp &
+    lx ly lz xy xz yz &
+    v_exx v_eyy v_ezz v_gxy v_gxz v_gyz &
+    c_press_compute[1] c_press_compute[2] c_press_compute[3] &
+    c_press_compute[4] c_press_compute[5] c_press_compute[6]
+
+    run ${nsteps}
+
+next i
+jump SELF STRAIN_LOOP
+
+print "STRAIN LOOP ENDS"

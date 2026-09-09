@@ -1,0 +1,80 @@
+# ============================================================
+# Relax single fullerene
+# ============================================================
+
+variable INPUT_CONFIG index "in.dat"
+variable MODEL index "model.model"
+variable DUMP index "dump.dump"
+variable OUT_FILE index "relaxed.lammps-data"
+
+units           metal
+dimension       3
+boundary        p p f
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+print "==========================================="
+print "READING DATA"
+read_data       ${INPUT_CONFIG}
+print "==========================================="
+
+mass            1 12.011
+
+print "==========================================="
+print "READING MODEL"
+pair_style      mliap unified ${MODEL} 0
+pair_coeff      * * C
+print "==========================================="
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        0.001
+
+thermo          1
+thermo_style    custom step pe fmax
+
+dump        relax_dump all custom 1 ${DUMP} id type x y z vx vy vz fx fy fz 
+
+#######################
+# parameters 
+
+# lower and upper layer
+variable zminlow equal 49
+variable zmaxlow equal 51
+variable zminhigh equal 52
+variable zmaxhigh equal 54
+
+region lowerreg block INF INF INF INF ${zminlow} ${zminhigh}
+region upperreg block INF INF INF INF ${zminhigh} ${zmaxhigh}
+
+group lowergr region lowerreg
+group uppergr region upperreg 
+
+###########################
+# Remove rigid-body DOF per layer
+# Preserves relative roto-translation during minimization
+
+#fix lowerdof lowergr momentum 1 linear 1 1 0 angular
+#fix upperdof uppergr momentum 1 linear 1 1 0 angular
+
+print "==========================================="
+print "RELAXATION START"
+reset_timestep  0
+
+#fix cell_relax_box_relax all box/relax x 0 y 0 xy 0 couple xy nreset 10 fixedpoint 0 0 0 # can be used only for triclinic
+#fix cell_relax_box_relax all box/relax x 0 y 0 nreset 10 fixedpoint 0 0 0
+
+
+min_style fire/kk &
+    project lowergr linear xy angular yes &
+    project uppergr linear xy angular yes
+minimize 0 1e-6 1000 10000
+
+
+undump relax_dump
+print "==========================================="
+
+write_data ${OUT_FILE}
+print           "Relaxation Done"

@@ -1,0 +1,24 @@
+% ---- LaTeX Table Code for Gamma Point Comparison ----
+\begin{table}[htbp]
+  \centering
+  \caption{Relative discrepancies (\%) of calculated phonon profiles relative to the reference \textbf{DFT-PBEsol}. Acoustic rows present un-repeated group sound velocities evaluated along specific path projections using a constrained polynomial approach ($f(k) = c_1 k + c_2 k^2 + c_3 k^3 + c_4 k^4$). Optical branches are evaluated strictly at the isotropic $\Gamma$ structural intercept, removing structural path repetition.}
+  \label{tab:gamma_phonon_comparison}
+  \begin{tabular}{cccccccccc}
+    \hline\hline
+    Path / Domain & Branch & Property Type  & v1 & v1-cut & v2 & v2-l2 & v3 & v4 & v5 \\
+    \hline
+    \midrule $\Gamma \rightarrow$ X & 1 & Acoustic Velocity  & -2.20\% & -3.86\% & -1.11\% & +0.02\% & -0.05\% & -1.39\% & -2.37\% \\
+                                   & 2 & Acoustic Velocity  & -0.80\% & -3.35\% & +1.39\% & +3.09\% & +1.60\% & +0.04\% & -0.90\% \\
+                                   & 3 & Acoustic Velocity  & -4.06\% & -4.67\% & -3.52\% & -3.69\% & -5.43\% & -5.76\% & -1.17\% \\
+    \midrule $\Gamma \rightarrow$ K & 1 & Acoustic Velocity  & -3.42\% & -8.56\% & -3.09\% & -0.67\% & -4.12\% & -5.45\% & +0.83\% \\
+                                   & 2 & Acoustic Velocity  & -0.23\% & -4.17\% & +2.17\% & +4.34\% & +2.19\% & +0.33\% & -0.60\% \\
+                                   & 3 & Acoustic Velocity  & -1.75\% & -3.19\% & +0.34\% & +0.71\% & -1.37\% & -2.29\% & -1.15\% \\
+    \midrule $\Gamma \rightarrow$ L & 1 & Acoustic Velocity  & +0.31\% & -7.86\% & +3.28\% & +6.89\% & +1.36\% & -0.85\% & +2.34\% \\
+                                   & 2 & Acoustic Velocity  & +0.65\% & -7.64\% & +3.59\% & +7.27\% & +1.59\% & -0.77\% & +2.78\% \\
+                                   & 3 & Acoustic Velocity  & -1.46\% & -2.78\% & +0.73\% & +1.20\% & -0.63\% & -1.74\% & -1.57\% \\
+    \midrule Exact $\Gamma$-point  & 4 & Optical Frequency   & -1.80\% & -2.17\% & -2.19\% & -1.45\% & -1.96\% & -1.97\% & -2.27\% \\
+                                   & 5 & Optical Frequency   & -1.80\% & -2.17\% & -2.19\% & -1.45\% & -1.96\% & -1.97\% & -2.27\% \\
+                                   & 6 & Optical Frequency   & -1.79\% & -2.17\% & -2.19\% & -1.45\% & -1.96\% & -1.97\% & -2.27\% \\
+    \hline\hline
+  \end{tabular}
+\end{table}

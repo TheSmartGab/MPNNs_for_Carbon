@@ -1,0 +1,43 @@
+# ============================================================
+# Relax single fullerene
+# ============================================================
+
+units           metal
+dimension       3
+boundary        s s s
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+read_data       fullerene.lammps-data
+
+mass            1 12.011
+labelmap        atom 1 C
+
+pair_style      mace no_domain_decomposition
+pair_coeff      * * "../../MACE.model-lammps.pt" C
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        0.001
+
+thermo          10
+thermo_style    custom step pe fmax
+
+dump            relax_dump all atom 10 fullerene_relax.dump
+
+# fix one atom to obtain well defined problem
+group fixed_atom id 1
+fix fix_fully_constrained fixed_atom setforce 0 0 0
+
+reset_timestep  0
+minimize        0 1e-8 1000 10000
+
+unfix fix_fully_constrained
+
+write_data      relaxed_fullerene.lammps-data
+
+undump          relax_dump
+print           "Single fullerene relaxation done"
+

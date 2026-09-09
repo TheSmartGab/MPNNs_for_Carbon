@@ -1,0 +1,169 @@
+# ============================================================
+# Scan of graphene on graphene potential
+# ============================================================
+
+# ---------------- INITIALIZATION ----------------
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+newton          on
+atom_modify     map yes
+
+# ---------------- ATOMS -------------------------
+read_data       2_layers_graphite.lammps-data
+
+mass            1 12.011
+labelmap        atom 1 C
+
+# ---------------- FORCE FIELD -------------------
+pair_style      mace no_domain_decomposition
+pair_coeff      1 1 "../../MACE.model-lammps.pt" C
+
+neighbor        1.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ---------------- SETTINGS ----------------------
+timestep        0.0005
+variable        ts equal 0.0005
+
+################################################
+# first, relax graphite cell
+group fully_constrained id 1
+fix cell_relax_contraints fully_constrained setforce 0 0 0
+fix cell_relax_box_relax all box/relax x 0 y 0 xy 0 couple xy nreset 10 fixedpoint 0 0 0
+
+thermo 1
+thermo_style custom lx ly lz pe press fmax
+dump cell_relax_dump all atom 1 "cell_relax.lammps-data"
+
+# compute upper atoms coordinates to access their relative position as initial guess of relative position for calculations in the loop
+
+reset_timestep  0
+minimize 0 1e-8 1000 10000
+unfix cell_relax_contraints
+unfix cell_relax_box_relax
+undump cell_relax_dump
+
+# write results. actually usefull, the starting configuration is ab stacking
+
+variable resultsfile string "graphene_potential.out"
+variable x3 equal $(x[3])
+variable y3 equal $(y[3])
+variable z3 equal $(z[3])
+variable ep equal $(pe)
+variable pressure equal $(press)
+print "${x3} ${y3} ${z3} ${ep} ${pressure}" append ${resultsfile}
+
+# compute displacement between upper 2 atoms, will be used in the loop as initial guess
+
+variable XDELTA equal $(x[4] - x[3])
+variable YDELTA equal $(y[4] - y[3])
+variable Z equal $(z[3])
+variable L equal $(lx)
+variable X2 equal $(x[2])
+variable Y2 equal $(y[2])
+variable Z2 equal $(z[2])
+
+# box vectors
+variable xlo equal xlo
+variable xhi equal xhi
+variable ylo equal ylo
+variable yhi equal yhi
+variable xy  equal xy   # box tilt
+
+variable a1x equal ${xhi}-${xlo}
+variable a1y equal 0
+variable a2x equal ${xy}
+variable a2y equal ${yhi}-${ylo}
+
+# It is not necessary to translate the atom 3 through the whole cell
+# in fact, it is enough to translate it only on 1/4 of the cell, within a triangle delimited by the
+# diagonals thanks to the 
+variable diag1x equal ${a1x} + ${a2x}
+variable diag1y equal ${a1y} + ${a2y}
+variable diag2x equal ${a2x} - ${a1x}
+variable diag2y equal ${a2y} - ${a1y}
+
+# ==============================================
+# constraints for atom position minimization
+
+# groups
+# constrain the first atom still
+group xy_constrained id 3
+group fully_relax id 2 4
+
+# impose the actual constraints using setforce, NULL does not alter force in that component
+fix fix_fully_constrained fully_constrained setforce 0 0 0
+fix fix_xy_constrained xy_constrained setforce 0 0 NULL
+
+# how many points to sample
+print "computing variables for grid"
+variable sqrt3 equal sqrt(3) # tan(pi/3)
+variable N1 equal 20 # number of spaces
+variable NP1 equal ${N1} + 1 # number of points to include boundary
+# variable N2 equal $(round(sqrt*${N1})) # number of points proportional to length
+variable L1 equal ${a1x}/2.0
+variable L2 equal ${L1}*${sqrt3}
+
+thermo 1
+thermo_style custom pe press fmax
+
+print "loop start"
+# sample boundaries as well
+variable i1 loop ${NP1}
+label loop1_start
+    # to stay in the triangle, have to do some computation
+    # I also want the boundary sampled
+    print "===================================="
+    print "STARTING i1 ${i1}"
+    variable u equal (${i1}-1)/(${N1}*2)
+    variable maxd2 equal $u*${L1}*${sqrt3}
+    variable n2 equal round(${N1} * ${sqrt3} * ${maxd2}/${L2}) # number of spaces proportional to lenght
+    variable np2 equal ${n2}+1
+    variable i2 loop ${np2}
+    label loop2_start
+	print "==================================="
+	print "STARTING i2 ${i2}"
+
+        # fractional coordinates 0 -> 0.5
+        # moce atom 3 in one triangle delimited by the diagonals
+        variable n2safe equal ${n2}
+        if "${n2} == 0" then "variable n2safe equal 1"
+ # at the beginning, n2=0, I loop over np2=1, and would get 0/0. I actually just want 0. this handles the problem
+        variable v equal (${i2}-1)/${n2safe}
+
+        # convert to Cartesian using box vectors
+        variable X3 equal ${u}*${diag1x} + ${v}*${diag2x} * ${maxd2} / ${L2}
+        variable Y3 equal ${u}*${diag1y} + ${v}*${diag2y} * ${maxd2} / ${L2}
+        variable X4 equal ${X3} + ${XDELTA}
+        variable Y4 equal ${Y3} + ${YDELTA}
+
+        print "====================================="
+        print "new variables"
+        print "${X3} ${Y3}"
+        print "====================================="
+
+        set atom 3 x ${X3} y ${Y3} z ${Z}
+        set atom 4 x ${X4} y ${Y4} z ${Z}
+        set atom 2 x ${X2} y ${Y2} z ${Z2}
+
+        # dump & minimize
+        variable dumpfile string graphite_relaxations/atom_relax_${i1}_${i2}.lammps-data
+        dump atom_relax_dump all atom 1 ${dumpfile}
+        reset_timestep 0
+        minimize 0 1e-8 100 1000
+        undump atom_relax_dump
+
+        # write results
+        variable z3 equal z[3]
+        variable ep equal $(pe)
+	variable pressure equal $(press)
+        print "${X3} ${Y3} ${z3} ${ep} ${pressure}" append ${resultsfile}
+
+    next i2
+    jump SELF loop2_start
+next i1
+jump SELF loop1_start
+
+print "All done"

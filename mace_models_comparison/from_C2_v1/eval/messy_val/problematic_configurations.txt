@@ -1,0 +1,11 @@
+config_type  F_mag_rmse [eV/A]
+Crystalline_RSS 	0.302
+Liquid			1.031
+LD_iter1		0.537
+Amorphous_Surfaces 	0.356
+Nanotubes 		0.211
+SACADA 			0.318
+Defects			0.199
+Amorphous_Bulk		0.439
+Fullerenes		0.374
+Surfeces	 	0.312	

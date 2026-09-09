@@ -1,0 +1,136 @@
+# =============================================================================
+# Python build & bytecode
+# =============================================================================
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+*.so
+
+# =============================================================================
+# Virtual environments & package caches (regenerated on every machine)
+# =============================================================================
+.venv/
+uv_tmp/
+
+# =============================================================================
+# Simulation data & model artifacts (bulk — not for git)
+# =============================================================================
+*.traj
+*.lammpstrj
+*.dump
+*.lammps
+*.restart
+RESTARTS_*
+*.lammps-data
+*.model
+*.pt
+*.pth
+*.ckpt
+*.extxyz
+# =============================================================================
+# KEPT: final model weights — intentionally tracked, overriding the *.model /
+#       *.pt / *.pth / *.ckpt ignores above. Only exported finals: no per-epoch
+#       checkpoints, no pretrained / foundation models.
+# =============================================================================
+# Dataset-size study: every final MACE model across all training sizes
+#   (8 sizes x {base, _compiled, _stagetwo, _stagetwo_compiled} + the 2 exported
+#    checkpoints each). No per-epoch .model files exist under NEW_SPLIT.
+!DATASET_SIZE_STUDY/NEW_SPLIT/mace/from_C2_v1/*/MACE_*.model
+!DATASET_SIZE_STUDY/NEW_SPLIT/mace/from_C2_v1/*/checkpoints/MACE_*.model
+
+# Per-experiment final weights (one line each).
+!mace/GAP2020/all/C2_only/smaller/checkpoints/MACE_run-1009.model
+!mace/GAP2020/all/C2_only/smaller/smaller_MACE.model
+!mace/GAP2020/all/C2_only/smaller/smaller_MACE_compiled.model
+!mace/GAP2020/all/C2_only/v0/MACE.model
+!mace/GAP2020/all/C2_only/v0/MACE_compiled.model
+!mace/GAP2020/all/C2_only/v0/checkpoints/MACE_run-1009.model
+!mace/GRAPHENE_MLIP_GPAW_COMPLEMENTS/C2_cutoff_100_stress/T3_c3_b16_l2_pF_f16_rd2_rw16/checkpoints/MACE.model
+!mace/GRAPHENE_MLIP_GPAW_COMPLEMENTS/C2_cutoff_100_stress/T3_c3_b16_l2_pF_f16_rd2_rw16/checkpoints/MACE_compiled.model
+!mace/GRAPHENE_MLIP_GPAW_COMPLEMENTS/C2_cutoff_100_stress/T3_c3_b16_l2_pF_f16_rd2_rw16/checkpoints/MACE_run-2731.model
+!mace/GRAPHENE_MLIP_GPAW_COMPLEMENTS/all_100frames_stress_shift_C2_f_cutoff_100_toghether/T3_c3_b16_l2_pF_f16_rd2_rw16/checkpoints/MACE_run-2731_epoch-15.pt
+!mace/GRAPHENE_MLIP_GPAW_COMPLEMENTS/all_100frames_stress_shift_C2_toghether/T2_c3_b16_l2_pF_f16_rd2_rw16/checkpoints/MACE_run-2731_epoch-175.pt
+!mace_models_comparison/from_C2_cut/MACE.model
+!mace_models_comparison/from_C2_cut/MACE_compiled.model
+!mace_models_comparison/from_C2_cut/checkpoints/MACE_run-1009.model
+!mace_models_comparison/from_C2_v1/FULLBATCH/checkpoints/MACE_run-123_epoch-83.pt
+!mace_models_comparison/from_C2_v1/MACE.model
+!mace_models_comparison/from_C2_v1/MACE.model-lammps.pt
+!mace_models_comparison/from_C2_v1/MACE.model-mliap_lammps.pt
+!mace_models_comparison/from_C2_v1/MACE_compiled.model
+!mace_models_comparison/from_C2_v1/checkpoints/MACE_run-1009.model
+!mace_models_comparison/mace-GAP2020-FROM_SCRATCH_v3/MACE.model
+!mace_models_comparison/mace-GAP2020-FROM_SCRATCH_v3/MACE.model-lammps.pt
+!mace_models_comparison/mace-GAP2020-FROM_SCRATCH_v3/MACE_compiled.model
+!mace_models_comparison/mace-GAP2020-FROM_SCRATCH_v3/checkpoints/MACE_run-1009.model
+!mace_models_comparison/mace-GAP2020-FROM_SCRATCH_v3/checkpoints/MACE_run-1009_epoch-97_swa.model-lammps.pt
+!mace_models_comparison/mace-GAP2020-FROM_SCRATCH_v4/MACE.model
+!mace_models_comparison/mace-GAP2020-FROM_SCRATCH_v4/MACE_compiled.model
+!mace_models_comparison/mace-GAP2020-FROM_SCRATCH_v4/checkpoints/MACE_run-1009.model
+!mace_models_comparison/mace-GAP2020_FROM_SCRATCH_smaller/MACE.model
+!mace_models_comparison/mace-GAP2020_FROM_SCRATCH_smaller/MACE.model-lammps.pt
+!mace_models_comparison/mace-GAP2020_FROM_SCRATCH_smaller/MACE_compiled.model
+!mace_models_comparison/mace-GAP2020_FROM_SCRATCH_smaller/checkpoints/MACE_run-1009.model
+!mace_models_comparison/mace-GAP2020_FROM_SCRATCH_smaller2_l2/MACE.model
+!mace_models_comparison/mace-GAP2020_FROM_SCRATCH_smaller2_l2/MACE.model-lammps.pt
+!mace_models_comparison/mace-GAP2020_FROM_SCRATCH_smaller2_l2/MACE_compiled.model
+!mace_models_comparison/mace-GAP2020_FROM_SCRATCH_smaller2_l2/checkpoints/MACE_run-1009.model
+!mace_models_comparison/v5training/MACE.model
+!mace_models_comparison/v5training/MACE_compiled.model
+!mace_models_comparison/v5training/MACE_stagetwo.model
+!mace_models_comparison/v5training/MACE_stagetwo_compiled.model
+!mace_models_comparison/v5training/checkpoints/MACE_run-1009.model
+!mace_models_comparison/v5training/checkpoints/MACE_run-1009_stagetwo.model
+
+
+# =============================================================================
+# Generated data, metrics & plots (bulk — not for git)
+#   NOTE: *.in / *.conf / *.xyz are LAMMPS/DFT *input* scripts & structures and
+#         are intentionally KEPT (they are the reproducible computational setup).
+# =============================================================================
+*.npy
+*.npz
+*.json
+*.csv
+*.done
+*.log
+*.err
+*.out
+*.pdf
+*.svg
+*.png
+
+# =============================================================================
+# Generated working / logging / output dirs (scratch — not for git)
+# =============================================================================
+WORKING/
+logger/
+outputs/
+
+# =============================================================================
+# nequip per-run version directories (generated training runs).
+#   Each holds only duplicated scripts + a per-run config + checkpoints — no
+#   unique source. Scoped to nequip/ so real experiment-root files (e.g.
+#   GRAPHENE_MLIP/all_100frames/run_evaluations.sh) are preserved.
+# =============================================================================
+nequip/**/v[0-9]*/
+nequip/**/checkpoint_v[0-9]*/
+nequip/**/model_*/
+nequip/**/T[0-9]_b*/
+nequip/**/lr_*/
+nequip/**/1000_all_lr_*/
+nequip/rmax6/*/
+
+# =============================================================================
+# Archives
+# =============================================================================
+*.tar.gz
+*.zip
+*.tgz
+
+# =============================================================================
+# Jupyter
+# =============================================================================
+.ipynb_checkpoints/
