@@ -16,10 +16,10 @@ The recommended use of these scripts is as follows:
 -  Run a strain-stress scan over a large range of strains to find the approximate breaking strain
 -  Generate independent configurations at a 'reasonably' stable (metastable) configuration
 -  Run change_strain_mliap_multiple.sh starting from the independent configurations you produce.
--  Infer breaking rate and run Arrhenius analysis using the scripts in [structure](src/structure)
+-  Infer breaking rate and run Arrhenius analysis using the scripts in [structure](/src/structure)
 
-The bash scripts require proper .conf files that define the simulation parameters. The actual files I used for my thesis work are stored [here](mace_models_comparison/from_C2_v1/LAMMPS_STUDIES/strain_stress/5_5/zigzag). 
+The bash scripts require proper .conf files that define the simulation parameters. The actual files I used for my thesis work are stored [here](/mace_models_comparison/from_C2_v1/LAMMPS_STUDIES/strain_stress/5_5/zigzag). 
 
-The bash scripts require some structural analysis Python scripts stored in [here](src/structure), so you have to configure the Python virtual environment and activate it to run these.
+The bash scripts require some structural analysis Python scripts stored in [here](/src/structure), so you have to configure the Python virtual environment and activate it to run these.
 
-The prime number selector in [primes](primes) is also required to set different runs. Create a symlink in /usr/bin/get_prime.php to it to call it from any directory seamlessly.
+The prime number selector in [primes](/primes) is also required to set different runs. Create a symlink in /usr/bin/get_prime.php to it to call it from any directory seamlessly.
